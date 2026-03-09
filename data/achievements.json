@@ -1,0 +1,93 @@
+[
+  {
+    "id": "ach_001",
+    "title": "Fuerza de un Caza F-16",
+    "targetWeight": 20000,
+    "equivalence": "Peso de un avión de combate cargado",
+    "description": "Has despegado con una fuerza increíble. ¡Tus entrenamientos tienen potencia de fuego!",
+    "category": "Bronce",
+    "imagePath": "https://res.cloudinary.com/dgscloudinary/image/upload/v1769694976/achievements-EvolutFit/ach_001_wzonxf.png"
+  },
+
+  {
+    "id": "ach_002",
+    "title": "Peso Pesado Prehistórico",
+    "targetWeight": 100000,
+    "equivalence": "Una manada de 15 Mamuts lanudos",
+    "description": "Has movido una cantidad de peso digna de la edad de hielo. ¡Eres una bestia!",
+    "category": "Bronce",
+    "imagePath": "https://res.cloudinary.com/dgscloudinary/image/upload/v1769694976/achievements-EvolutFit/ach_002_fltmer.png"
+  },
+  {
+    "id": "ach_003",
+    "title": "Ingeniero Ferroviario",
+    "targetWeight": 500000,
+    "equivalence": "Una Locomotora de vapor completa",
+    "description": "Tu motor no se detiene. Has desplazado el peso de un tren legendario.",
+    "category": "Bronce",
+    "imagePath": "https://res.cloudinary.com/dgscloudinary/image/upload/v1769694977/achievements-EvolutFit/ach_003_mjilzf.png"
+  },
+  {
+    "id": "ach_004",
+    "title": "Arquitecto de Hierro",
+    "targetWeight": 1500000,
+    "equivalence": "150 vigas estructurales de rascacielos",
+    "description": "Estás construyendo un cuerpo de acero. Cada repetición es un cimiento de tu rascacielos.",
+    "category": "Plata",
+    "imagePath": "https://res.cloudinary.com/dgscloudinary/image/upload/v1769694977/achievements-EvolutFit/ach_004_idv2gn.png"
+  },
+  {
+    "id": "ach_005",
+    "title": "Comandante del Titanic",
+    "targetWeight": 5000000,
+    "equivalence": "El peso del acero del casco del Titanic",
+    "description": "Has movido una masa legendaria. Ni el océano podría hundir tu determinación.",
+    "category": "Plata",
+    "imagePath": "https://res.cloudinary.com/dgscloudinary/image/upload/v1769694976/achievements-EvolutFit/ach_005_j5dxhx.png"
+  },
+  {
+    "id": "ach_006",
+    "title": "Titán del Burj Khalifa",
+    "targetWeight": 15000000,
+    "equivalence": "El hormigón de la base del edificio más alto",
+    "description": "Sostienes la base del éxito. Tu volumen de entrenamiento ha llegado a las nubes.",
+    "category": "Plata",
+    "imagePath": "https://res.cloudinary.com/dgscloudinary/image/upload/v1769694976/achievements-EvolutFit/ach_006_qcgvgd.png"
+  },
+  {
+    "id": "ach_007",
+    "title": "Masa del Golden Gate",
+    "targetWeight": 50000000,
+    "equivalence": "Una sección principal del puente de San Francisco",
+    "description": "Has tendido un puente entre el esfuerzo y la gloria. Tu fuerza es de ingeniería pura.",
+    "category": "Oro",
+    "imagePath": "https://res.cloudinary.com/dgscloudinary/image/upload/v1769694977/achievements-EvolutFit/ach_007_tl7g9x.png"
+  },
+  {
+    "id": "ach_008",
+    "title": "Cinturón de Asteroides",
+    "targetWeight": 150000000,
+    "equivalence": "La masa de un asteroide de tamaño medio",
+    "description": "Tu fuerza ya no es de este mundo. Has movido cuerpos celestes en el gimnasio.",
+    "category": "Oro",
+    "imagePath": "https://res.cloudinary.com/dgscloudinary/image/upload/v1769694977/achievements-EvolutFit/ach_008_uuftbx.png"
+  },
+  {
+    "id": "ach_009",
+    "title": "El Peso del Firmamento",
+    "targetWeight": 500000000,
+    "equivalence": "El peso de una montaña lunar",
+    "description": "Estás desafiando las leyes de la física. Tu constancia ha creado su propio campo gravitatorio.",
+    "category": "Oro",
+    "imagePath": "https://res.cloudinary.com/dgscloudinary/image/upload/v1769694977/achievements-EvolutFit/ach_009_sabtua.png"
+  },
+  {
+    "id": "ach_010",
+    "title": "El Atlas de EvolutFit",
+    "targetWeight": 1000000000,
+    "equivalence": "Un millón de toneladas métricas",
+    "description": "Alcanzaste el nivel deidad. El mundo entero descansa sobre tus hombros.",
+    "category": "Épico",
+    "imagePath": "https://res.cloudinary.com/dgscloudinary/image/upload/v1769694977/achievements-EvolutFit/ach_010_incar0.png"
+  }
+]

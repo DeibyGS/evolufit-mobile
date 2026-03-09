@@ -13,7 +13,7 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 15000, // 15 segundos antes de dar error de conexión
+  timeout: 60000,
 });
 
 /**
@@ -45,7 +45,6 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       // Si el token expira, cerramos sesión automáticamente
       useAuthStore.getState().logout();
-      console.log("Sesión expirada o token inválido.");
     }
     return Promise.reject(error);
   },

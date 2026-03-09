@@ -2,12 +2,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
-    Image,
-    ImageBackground,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  ImageBackground,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { LoginForm } from "../../components/auth/LoginForm";
 import { COLORS, FONTS } from "../../constants/theme";
@@ -20,7 +20,7 @@ export default function LoginPage() {
       <ImageBackground
         source={require("../../assets/images/Hero.png")}
         style={styles.background}
-        imageStyle={{ opacity: 0.15 }} // Un poco más oscuro para resaltar el logo inferior
+        imageStyle={{ opacity: 0.15 }}
       >
         {/* BOTÓN VOLVER */}
         <TouchableOpacity

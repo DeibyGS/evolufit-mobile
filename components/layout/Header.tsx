@@ -44,7 +44,7 @@ export const Header = ({ onNavigate }: HeaderProps) => {
             Evolut<Text style={{ color: COLORS.orange }}>Fit</Text>
           </Text>
           <Image
-            source={require("../../assets/images/diagrama.png")}
+            source={require("../../assets/images/evolutFitLogo.png")}
             style={styles.logoImg}
             resizeMode="contain"
           />
@@ -147,14 +147,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: SIZES.paddingMin,
     height: 70,
   },
-  brandContainer: { flexDirection: "row", alignItems: "center", gap: 8 },
+  brandContainer: { flexDirection: "row", alignItems: "center" },
   logoText: {
     fontFamily: FONTS.secondaryBold,
     fontSize: 24,
     color: "#fff",
     letterSpacing: 1,
   },
-  logoImg: { height: 30, width: 30 },
+  logoImg: { height: 50, width: 50 },
   hamburgerButton: {
     width: 42,
     height: 42,

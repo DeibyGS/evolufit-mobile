@@ -4,8 +4,9 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 // Definimos la forma del usuario para tener autocompletado (TypeScript)
 interface User {
-  id: string;
+  _id: string;
   name: string;
+  lastname: string;
   email: string;
   role: string;
   // añade aquí otros campos que devuelva tu backend

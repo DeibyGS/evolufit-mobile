@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import {
-    StyleSheet,
-    Text,
-    TextInput,
-    TextInputProps,
-    View,
+  StyleSheet,
+  Text,
+  TextInput,
+  TextInputProps,
+  View,
 } from "react-native";
 import { COLORS, FONTS, SIZES } from "../../constants/theme";
 
@@ -14,15 +14,21 @@ interface InputProps extends TextInputProps {
 }
 
 export const InputStandard = ({ label, ...props }: InputProps) => {
+  const [isFocused, setIsFocused] = useState(false);
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, isFocused && { color: "#fff" }]}>
+        {label}
+      </Text>
       <TextInput
         style={[
           styles.input,
-          props.multiline && styles.inputMultiline, // Si es multiline (mensaje), le da más altura
+          props.multiline && styles.inputMultiline,
+          isFocused && styles.inputFocused,
         ]}
         placeholderTextColor="rgba(255, 255, 255, 0.3)"
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         {...props}
       />
     </View>
@@ -57,5 +63,9 @@ const styles = StyleSheet.create({
     minHeight: 100,
     textAlignVertical: "top", // Importante para que el texto empiece arriba en Android
     paddingTop: 15,
+  },
+  inputFocused: {
+    borderColor: COLORS.orange,
+    backgroundColor: "rgba(255, 165, 0, 0.05)", // Un toque sutil de naranja de fondo
   },
 });

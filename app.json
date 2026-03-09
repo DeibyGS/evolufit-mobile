@@ -1,38 +1,37 @@
 {
   "expo": {
-    "name": "evolufit-mobile",
+    "name": "EvolutFit",
     "slug": "evolufit-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/diagrama.png",
+    "icon": "./assets/images/evolutFitLogo.png",
     "scheme": "evolufitmobile",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/diagrama.png",
+      "image": "./assets/images/evolutFitLogo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#000000"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.evolufit-mobile"
+      "bundleIdentifier": "com.deibygs.evolufit"
     },
     "android": {
+      "package": "com.deibygs.evolufit",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/diagrama.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/evolutFitLogo.png",
+        "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "permissions": ["INTERNET"]
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/diagrama.png"
+      "favicon": "./assets/images/evolutFitLogo.png"
     },
-    "plugins": [
-      "expo-router"
-    ],
+    "plugins": ["expo-router", "@react-native-community/datetimepicker"],
     "experiments": {
       "typedRoutes": true
     }

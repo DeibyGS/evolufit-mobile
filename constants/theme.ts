@@ -27,6 +27,16 @@ export const COLORS = {
   // GLASSMORPHISM (Basado en tu mixin card-glass)
   glassBg: "rgba(255, 255, 255, 0.02)",
   glassBorder: "rgba(255, 255, 255, 0.05)",
+
+  chartColors: [
+    "#FFA500", // Naranja (Tu marca)
+    "#00E5FF", // Cyan (Contraste alto)
+    "#70FF00", // Lima (Energía)
+    "#FF007A", // Magenta (Intensidad)
+    "#8C52FF", // Violeta (Fuerza)
+    "#FFD700", // Dorado (Logros)
+    "#00FFD1", // Turquesa
+  ],
 };
 
 export const SIZES = {
