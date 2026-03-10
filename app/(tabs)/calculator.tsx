@@ -51,7 +51,7 @@ export default function HealthCalculator() {
   };
 
   const sortedHistory = useMemo(() => {
-    return [...history].sort((a, b) => a.imc - b.imc).slice(0, 3);
+    return [...history].sort((a, b) => a.imc - b.imc);
   }, [history]);
 
   // --- LÓGICA DE CÁLCULO LOCAL ---
