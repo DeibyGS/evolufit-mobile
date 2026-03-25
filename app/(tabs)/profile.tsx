@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import NetInfo from "@react-native-community/netinfo";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   ScrollView,
@@ -13,6 +14,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import api from "../../api/API";
+import OfflineBanner from "../../components/OfflineBanner";
 import { COLORS, FONTS } from "../../constants/theme";
 import { useAuthStore } from "../../store/useAuthStore";
 
@@ -20,6 +22,9 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { user, logout } = useAuthStore();
   const router = useRouter();
+
+  // Offline state: controlled exclusively by the NetInfo subscription below
+  const [isOffline, setIsOffline] = useState(false);
 
   // ESTADOS DEL FORMULARIO
   const [showPassForm, setShowPassForm] = useState(false);
@@ -41,6 +46,20 @@ export default function ProfileScreen() {
     onConfirm: () => {},
     isDanger: false,
   });
+
+  // Proactive NetInfo subscription: show banner as soon as connectivity is lost
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      if (state.isConnected === false) {
+        setIsOffline(true);
+      } else if (state.isConnected === true) {
+        setIsOffline(false);
+      }
+    });
+
+    // Cleanup: remove listener on unmount to prevent memory leaks
+    return () => unsubscribe();
+  }, []);
 
   // --- LÓGICA: CAMBIAR CONTRASEÑA ---
   const handleChangePassword = async () => {
@@ -159,6 +178,9 @@ export default function ProfileScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
+      {/* BANNER OFFLINE — visible cuando no hay conexión a internet */}
+      <OfflineBanner visible={isOffline} />
+
       {/* HEADER */}
       <View style={styles.header}>
         <View>
@@ -354,7 +376,7 @@ export default function ProfileScreen() {
             </View>
             <Text style={styles.modalTitle}>{modalConfig.title}</Text>
             <Text style={styles.modalText}>{modalConfig.message}</Text>
-            <div style={styles.modalBtnRow}>
+            <View style={styles.modalBtnRow}>
               <TouchableOpacity
                 style={styles.modalCancelBtn}
                 onPress={() =>
@@ -386,7 +408,7 @@ export default function ProfileScreen() {
                   Confirmar
                 </Text>
               </TouchableOpacity>
-            </div>
+            </View>
           </View>
         </View>
       </Modal>

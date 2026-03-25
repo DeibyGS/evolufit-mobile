@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import NetInfo from "@react-native-community/netinfo";
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -12,6 +13,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import api from "../../api/API";
+import OfflineBanner from "../../components/OfflineBanner";
 import { COLORS, FONTS } from "../../constants/theme";
 import { useAuthStore } from "../../store/useAuthStore";
 
@@ -26,7 +28,12 @@ export default function LeaderboardScreen() {
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasNextPage, setHasNextPage] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
   const LIMIT = 10;
+
+  // Flag to skip the first NetInfo emission (fires immediately on subscribe)
+  // and avoid duplicating the initial fetchLeaderboard() call from useFocusEffect.
+  const isFirstNetInfoEmit = useRef(true);
 
   useFocusEffect(
     useCallback(() => {
@@ -34,7 +41,7 @@ export default function LeaderboardScreen() {
     }, []),
   );
 
-  const fetchLeaderboard = async (pageNumber = 1, isInitial = false) => {
+  const fetchLeaderboard = useCallback(async (pageNumber = 1, isInitial = false) => {
     try {
       if (isInitial) setLoading(true);
       else setLoadingMore(true);
@@ -49,13 +56,42 @@ export default function LeaderboardScreen() {
       setRanking((prev) => (isInitial ? newItems : [...prev, ...newItems]));
       setHasNextPage(moreExist);
       setPage(pageNumber);
-    } catch (error) {
-      console.error("Error al obtener ranking:", error);
+      setIsOffline(false);
+    } catch (error: any) {
+      const isNetworkError = !error.response && error.message === "Network Error";
+      if (isNetworkError) {
+        setIsOffline(true);
+      } else {
+        console.error("Error al obtener ranking:", error);
+      }
     } finally {
       setLoading(false);
       setLoadingMore(false);
     }
-  };
+  }, []);
+
+  // Proactive NetInfo subscription: react to connectivity changes immediately
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      // Skip the first emission to avoid duplicating the useFocusEffect load call.
+      if (isFirstNetInfoEmit.current) {
+        isFirstNetInfoEmit.current = false;
+        return;
+      }
+
+      if (state.isConnected === false) {
+        // No internet — show offline banner without waiting for the next fetch to fail
+        setIsOffline(true);
+      } else if (state.isConnected === true) {
+        // Reconnected — reload page 1 so data is fresh again
+        setIsOffline(false);
+        fetchLeaderboard(1, true);
+      }
+    });
+
+    // Cleanup: remove listener on unmount to prevent memory leaks
+    return () => unsubscribe();
+  }, [fetchLeaderboard]);
 
   const handleLoadMore = () => {
     if (!loadingMore && hasNextPage) {
@@ -76,6 +112,9 @@ export default function LeaderboardScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 60 }}
       >
+        {/* BANNER OFFLINE — visible cuando no hay conexión a internet */}
+        <OfflineBanner visible={isOffline} />
+
         <View style={styles.header}>
           <Text style={styles.title}>
             Hall of <Text style={{ color: COLORS.orange }}>Fame</Text> 🏆
