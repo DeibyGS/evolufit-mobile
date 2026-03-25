@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useCallback, useEffect, useState } from "react";
+import NetInfo from "@react-native-community/netinfo";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -16,6 +17,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import api from "../../api/API";
+import OfflineBanner from "../../components/OfflineBanner";
 import { COLORS, FONTS } from "../../constants/theme";
 import { MUSCLE_GROUPS } from "../../data/exercises";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -28,6 +30,11 @@ export default function CommunityScreen() {
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState(false);
+
+  // Flag to skip the first NetInfo emission (fires immediately on subscribe)
+  // and avoid duplicating the initial fetchPosts() call from the mount useEffect.
+  const isFirstNetInfoEmit = useRef(true);
 
   const [search, setSearch] = useState("");
   const [filterMuscle, setFilterMuscle] = useState("");
@@ -63,12 +70,18 @@ export default function CommunityScreen() {
         setPosts((prev) => (isNextPage ? [...prev, ...newPosts] : newPosts));
         setHasNextPage(next);
         setPage(currentPage);
-      } catch (error) {
-        Toast.show({
-          type: "error",
-          text1: "Error de conexión",
-          text2: "No pudimos cargar la comunidad ",
-        });
+        setIsOffline(false);
+      } catch (error: any) {
+        const isNetworkError = !error.response && error.message === "Network Error";
+        if (isNetworkError) {
+          setIsOffline(true);
+        } else {
+          Toast.show({
+            type: "error",
+            text1: "Error de conexión",
+            text2: "No pudimos cargar la comunidad ",
+          });
+        }
       } finally {
         setLoading(false);
         setLoadingMore(false);
@@ -84,6 +97,29 @@ export default function CommunityScreen() {
     }, 500);
     return () => clearTimeout(delay);
   }, [filterMuscle, search, sortBy]);
+
+  // Proactive NetInfo subscription: react to connectivity changes immediately
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      // Skip the first emission to avoid duplicating the mount fetchPosts() call.
+      if (isFirstNetInfoEmit.current) {
+        isFirstNetInfoEmit.current = false;
+        return;
+      }
+
+      if (state.isConnected === false) {
+        // No internet — show offline banner without waiting for the next fetch to fail
+        setIsOffline(true);
+      } else if (state.isConnected === true) {
+        // Reconnected — reload page 1 so data is fresh again
+        setIsOffline(false);
+        fetchPosts(false);
+      }
+    });
+
+    // Cleanup: remove listener on unmount to prevent memory leaks
+    return () => unsubscribe();
+  }, [fetchPosts]);
 
   const handleLike = async (postId: string) => {
     try {
@@ -271,6 +307,8 @@ export default function CommunityScreen() {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={() => (
           <>
+            {/* BANNER OFFLINE — visible cuando no hay conexión a internet */}
+            <OfflineBanner visible={isOffline} />
             <View style={styles.header}>
               <View>
                 <Text style={styles.title}>
