@@ -3,6 +3,19 @@ import { Tabs } from "expo-router";
 import { Platform } from "react-native";
 import { COLORS } from "../../constants/theme";
 
+/**
+ * Layout de la navegación por pestañas (zona autenticada).
+ *
+ * Expo Router crea automáticamente una tab por cada archivo dentro de
+ * la carpeta `(tabs)/`. Las pantallas registradas con `href: null` siguen
+ * siendo rutas válidas pero no aparecen en la barra de navegación.
+ * Esto permite navegar a ellas desde otras pantallas (ej: desde el
+ * dashboard al leaderboard) sin saturar el tab bar.
+ *
+ * Diferencia de altura entre plataformas:
+ * - iOS tiene una safe area inferior (home bar) que requiere más
+ *   paddingBottom para que los iconos no queden tapados.
+ */
 export default function TabLayout() {
   return (
     <Tabs
@@ -11,6 +24,7 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: "#000",
           borderTopColor: "#222",
+          // iOS necesita más espacio por la home bar del notch
           height: Platform.OS === "ios" ? 85 : 65,
           paddingBottom: Platform.OS === "ios" ? 30 : 10,
           paddingTop: 8,
@@ -22,7 +36,7 @@ export default function TabLayout() {
           fontSize: 12,
           fontWeight: "500",
         },
-        // Estilo común para los headers cuando se activan
+        // Estilo común para los headers cuando se activan en pantallas hijas
         headerStyle: {
           backgroundColor: "#000",
           borderBottomWidth: 1,
@@ -35,6 +49,8 @@ export default function TabLayout() {
         },
       }}
     >
+      {/* ── PESTAÑAS VISIBLES EN EL TAB BAR ── */}
+
       <Tabs.Screen
         name="dashboard"
         options={{
@@ -90,7 +106,6 @@ export default function TabLayout() {
           ),
         }}
       />
-
       <Tabs.Screen
         name="socialRoutines"
         options={{
@@ -107,7 +122,11 @@ export default function TabLayout() {
         }}
       />
 
-      {/* RAMPAS DE NAVEGACIÓN OCULTAS EN EL TAB BAR */}
+      {/*
+        ── PANTALLAS INTERNAS (sin pestaña visible) ──
+        `href: null` registra la ruta en el router pero la excluye del
+        tab bar. Se navega a ellas con router.push() desde otras pantallas.
+      */}
       <Tabs.Screen
         name="leaderboard"
         options={{
@@ -137,6 +156,14 @@ export default function TabLayout() {
         options={{
           href: null,
           title: "Ajustes de Perfil 👤",
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="notifications"
+        options={{
+          href: null,
+          title: "Notificaciones 🔔",
           headerShown: false,
         }}
       />

@@ -23,7 +23,7 @@ export default function ProfileScreen() {
   const { user, logout } = useAuthStore();
   const router = useRouter();
 
-  // Offline state: controlled exclusively by the NetInfo subscription below
+  // Estado offline controlado exclusivamente por la suscripción de NetInfo de abajo
   const [isOffline, setIsOffline] = useState(false);
 
   // ESTADOS DEL FORMULARIO
@@ -38,6 +38,12 @@ export default function ProfileScreen() {
   const [errors, setErrors] = useState<any>({});
   const [emptyState, setEmptyState] = useState(false);
 
+  /**
+   * Un solo estado configurable para manejar los dos modales de confirmación
+   * (cerrar sesión y eliminar cuenta). Evita duplicar estados y lógica de modal.
+   * El campo `isDanger` controla el color del botón de confirmación (rojo vs naranja).
+   * El campo `onConfirm` permite inyectar la acción específica de cada modal.
+   */
   // ESTADO MODAL
   const [modalConfig, setModalConfig] = useState({
     visible: false,
@@ -47,7 +53,12 @@ export default function ProfileScreen() {
     isDanger: false,
   });
 
-  // Proactive NetInfo subscription: show banner as soon as connectivity is lost
+  /**
+   * Suscripción a cambios de conectividad (patrón simplificado).
+   * Esta pantalla no hace fetch al montar — los datos del usuario vienen de Zustand,
+   * que ya actúa como caché en memoria. Por eso no necesita isFirstNetInfoEmit
+   * ni lógica de recarga al reconectar.
+   */
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
       if (state.isConnected === false) {
@@ -57,10 +68,16 @@ export default function ProfileScreen() {
       }
     });
 
-    // Cleanup: remove listener on unmount to prevent memory leaks
+    // Al desmontar el componente, eliminamos el listener para evitar fugas de memoria
     return () => unsubscribe();
   }, []);
 
+  /**
+   * Gestiona el flujo de cambio de contraseña con validación en dos capas:
+   * 1. Validación frontend: campos vacíos y coincidencia de contraseñas (sin petición al servidor)
+   * 2. Validación backend: errores Zod devueltos como array de {path, message}
+   *    que se mapean a campos específicos del formulario para mostrarlos inline.
+   */
   // --- LÓGICA: CAMBIAR CONTRASEÑA ---
   const handleChangePassword = async () => {
     // 1. Limpieza inicial
@@ -350,6 +367,31 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* SECCIÓN 3: NOTIFICACIONES */}
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => router.push("/(tabs)/notifications")}
+          activeOpacity={0.75}
+        >
+          <View style={styles.cardHeader}>
+            <Ionicons
+              name="notifications-outline"
+              size={20}
+              color={COLORS.orange}
+            />
+            <Text style={styles.cardTitle}>Notificaciones</Text>
+            <Ionicons
+              name="chevron-forward"
+              size={18}
+              color="#555"
+              style={{ marginLeft: "auto" }}
+            />
+          </View>
+          <Text style={styles.label}>
+            Configura recordatorios y alertas de entrenamiento
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
 
       {/* MODAL DE CONFIRMACIÓN */}
