@@ -1,5 +1,7 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import NetInfo from "@react-native-community/netinfo";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -14,6 +16,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import api from "../../api/API";
+import OfflineBanner from "../../components/OfflineBanner";
 import { COLORS, FONTS } from "../../constants/theme";
 import { EXERCISES_DB, MUSCLE_GROUPS } from "../../data/exercises";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -39,6 +42,7 @@ export default function RMCalculatorScreen() {
   const [savedRMs, setSavedRMs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCalculated, setIsCalculated] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
 
   // ESTADOS DE PAGINACIÓN
   const [page, setPage] = useState(1);
@@ -49,6 +53,10 @@ export default function RMCalculatorScreen() {
   // ESTADOS PARA EL MODAL DE ELIMINAR
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState<string | null>(null);
+
+  // Flag to skip the first NetInfo emission (fires immediately on subscribe)
+  // and avoid duplicating the initial fetchSavedRMs() call from the mount useEffect.
+  const isFirstNetInfoEmit = useRef(true);
 
   // --- LÓGICA PARA MEJOR REGISTRO ---
   const bestResultsByExercise = useMemo(() => {
@@ -75,7 +83,7 @@ export default function RMCalculatorScreen() {
     [selectedGroup],
   );
 
-  // FETCH DE REGISTROS
+  // FETCH DE REGISTROS + CACHÉ OFFLINE
   const fetchSavedRMs = useCallback(
     async (isNextPage = false) => {
       if (isNextPage) setLoadingMore(true);
@@ -93,11 +101,27 @@ export default function RMCalculatorScreen() {
         setSavedRMs((prev) =>
           isNextPage ? [...prev, ...newRecords] : newRecords,
         );
-
         setHasNextPage(hasMore);
         setPage(currentPage);
-      } catch (error) {
-        Toast.show({ type: "error", text1: "Error al cargar historial" });
+        setIsOffline(false);
+
+        // Persist page 1 for offline use
+        if (!isNextPage) {
+          await AsyncStorage.setItem("cache:rm-records", JSON.stringify(newRecords));
+        }
+      } catch (error: any) {
+        const isNetworkError = !error.response && error.message === "Network Error";
+        if (isNetworkError && !isNextPage) {
+          const cached = await AsyncStorage.getItem("cache:rm-records");
+          if (cached) {
+            setSavedRMs(JSON.parse(cached));
+            setIsOffline(true);
+          } else {
+            Toast.show({ type: "error", text1: "Sin conexión y sin datos guardados" });
+          }
+        } else {
+          Toast.show({ type: "error", text1: "Error al cargar historial" });
+        }
       } finally {
         setLoading(false);
         setLoadingMore(false);
@@ -109,6 +133,29 @@ export default function RMCalculatorScreen() {
   useEffect(() => {
     fetchSavedRMs(false);
   }, []);
+
+  // Proactive NetInfo subscription: react to connectivity changes immediately
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      // Skip the first emission to avoid duplicating the mount fetchSavedRMs() call.
+      if (isFirstNetInfoEmit.current) {
+        isFirstNetInfoEmit.current = false;
+        return;
+      }
+
+      if (state.isConnected === false) {
+        // No internet — show offline banner without waiting for the next fetch to fail
+        setIsOffline(true);
+      } else if (state.isConnected === true) {
+        // Reconnected — reload page 1 so data is fresh again
+        setIsOffline(false);
+        fetchSavedRMs(false);
+      }
+    });
+
+    // Cleanup: remove listener on unmount to prevent memory leaks
+    return () => unsubscribe();
+  }, [fetchSavedRMs]);
 
   // CÁLCULO DE 1RM
   const calculateRM = () => {
@@ -207,6 +254,7 @@ export default function RMCalculatorScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
+      <OfflineBanner visible={isOffline} />
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>
