@@ -1,5 +1,7 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import NetInfo from "@react-native-community/netinfo";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -15,6 +17,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import api from "../../api/API";
+import OfflineBanner from "../../components/OfflineBanner";
 import { COLORS, FONTS } from "../../constants/theme";
 import { EXERCISES_DB, MUSCLE_GROUPS } from "../../data/exercises";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -29,6 +32,7 @@ export default function RoutinesScreen() {
   const [isStarted, setIsStarted] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isOffline, setIsOffline] = useState(false);
 
   // --- ESTADOS DE LA SESIÓN ACTIVA ---
   const [routineName, setRoutineName] = useState("");
@@ -49,11 +53,15 @@ export default function RoutinesScreen() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState<string | null>(null);
 
+  // Flag to skip the first NetInfo emission (fires immediately on subscribe)
+  // and avoid duplicating the initial fetchHistory() call from the mount useEffect.
+  const isFirstNetInfoEmit = useRef(true);
+
   const filteredExercises = useMemo(() => {
     return EXERCISES_DB.filter((ex) => ex.group === selectedGroup);
   }, [selectedGroup]);
 
-  // --- FETCH HISTORIAL CON PAGINACIÓN ---
+  // --- FETCH HISTORIAL CON PAGINACIÓN + CACHÉ OFFLINE ---
   const fetchHistory = useCallback(
     async (isNextPage = false) => {
       if (isNextPage) setLoadingMore(true);
@@ -73,9 +81,25 @@ export default function RoutinesScreen() {
         );
         setHasNextPage(hasMore);
         setPage(pageToFetch);
-      } catch (error) {
-        console.error("Error cargando historial", error);
-        Toast.show({ type: "error", text1: "Error al cargar el historial" });
+        setIsOffline(false);
+
+        // Persist page 1 for offline use
+        if (!isNextPage) {
+          await AsyncStorage.setItem("cache:routines", JSON.stringify(newRecords));
+        }
+      } catch (error: any) {
+        const isNetworkError = !error.response && error.message === "Network Error";
+        if (isNetworkError && !isNextPage) {
+          const cached = await AsyncStorage.getItem("cache:routines");
+          if (cached) {
+            setHistory(JSON.parse(cached));
+            setIsOffline(true);
+          } else {
+            Toast.show({ type: "error", text1: "Sin conexión y sin datos guardados" });
+          }
+        } else {
+          Toast.show({ type: "error", text1: "Error al cargar el historial" });
+        }
       } finally {
         setLoading(false);
         setLoadingMore(false);
@@ -87,6 +111,29 @@ export default function RoutinesScreen() {
   useEffect(() => {
     fetchHistory(false);
   }, []);
+
+  // Proactive NetInfo subscription: react to connectivity changes immediately
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      // Skip the first emission to avoid duplicating the mount fetchHistory() call.
+      if (isFirstNetInfoEmit.current) {
+        isFirstNetInfoEmit.current = false;
+        return;
+      }
+
+      if (state.isConnected === false) {
+        // No internet — show offline banner without waiting for the next fetch to fail
+        setIsOffline(true);
+      } else if (state.isConnected === true) {
+        // Reconnected — reload page 1 so data is fresh again
+        setIsOffline(false);
+        fetchHistory(false);
+      }
+    });
+
+    // Cleanup: remove listener on unmount to prevent memory leaks
+    return () => unsubscribe();
+  }, [fetchHistory]);
 
   // --- LÓGICA DE ELIMINACIÓN ---
   const handleDeleteWorkout = async () => {
@@ -176,6 +223,7 @@ export default function RoutinesScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
+      <OfflineBanner visible={isOffline} />
       {!isStarted ? (
         <ScrollView
           showsVerticalScrollIndicator={false}

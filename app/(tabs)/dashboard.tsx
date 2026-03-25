@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import NetInfo from "@react-native-community/netinfo";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dimensions,
   Modal,
@@ -12,6 +13,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
+import OfflineBanner from "../../components/OfflineBanner";
 import { COLORS, FONTS } from "../../constants/theme";
 import { useAuthStore } from "../../store/useAuthStore";
 
@@ -25,6 +27,23 @@ export default function DashboardScreen() {
 
   // ESTADO PARA EL MODAL DE CONFIRMACIÓN (Consistente con Profile)
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  // Offline state: controlled exclusively by the NetInfo subscription below
+  const [isOffline, setIsOffline] = useState(false);
+
+  // Proactive NetInfo subscription: show banner as soon as connectivity is lost
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      if (state.isConnected === false) {
+        setIsOffline(true);
+      } else if (state.isConnected === true) {
+        setIsOffline(false);
+      }
+    });
+
+    // Cleanup: remove listener on unmount to prevent memory leaks
+    return () => unsubscribe();
+  }, []);
 
   const handleLogout = () => {
     setShowLogoutModal(true);
@@ -82,6 +101,9 @@ export default function DashboardScreen() {
         style={[styles.container, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
       >
+        {/* BANNER OFFLINE — visible cuando no hay conexión a internet */}
+        <OfflineBanner visible={isOffline} />
+
         {/* SECCIÓN BIENVENIDA */}
         <View style={styles.welcomeSection}>
           <Text style={styles.hi}>Bienvenido,</Text>
