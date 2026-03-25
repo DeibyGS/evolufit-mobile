@@ -1,24 +1,19 @@
 {
   "extends": "expo/tsconfig.base",
-  "jsx": "react-native",
-
   "compilerOptions": {
     "strict": true,
-
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "types": ["jest", "@testing-library/jest-native", "node"],
+    "moduleResolution": "bundler",
+    "jsx": "react-native"
   },
-
   "include": [
     "**/*.ts",
-
     "**/*.tsx",
-
     ".expo/types/**/*.ts",
-
     "expo-env.d.ts",
-
-    "app/(tabs)/_layout.tsx.backup"
+    "jest.config.js"
   ]
 }

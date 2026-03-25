@@ -25,7 +25,7 @@ jest.mock("@react-native-community/netinfo", () => ({
 
 // AsyncStorage (necesario porque useAuthStore usa zustand/persist con AsyncStorage)
 jest.mock("@react-native-async-storage/async-storage", () =>
-  require("@react-native-async-storage/async-storage/jest/async-storage-mock")
+  require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
 );
 
 // expo-router: evitamos errores de NavigationContainer
@@ -60,9 +60,7 @@ jest.mock("../components/OfflineBanner", () => {
   return {
     __esModule: true,
     default: ({ visible }: { visible: boolean }) =>
-      visible ? (
-        <Text testID="offline-banner">Sin conexión</Text>
-      ) : null,
+      visible ? <Text testID="offline-banner">Sin conexión</Text> : null,
   };
 });
 

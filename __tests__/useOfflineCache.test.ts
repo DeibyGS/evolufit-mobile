@@ -17,7 +17,7 @@ import { useOfflineCache } from "../hooks/useOfflineCache";
 
 // Mock de AsyncStorage: usamos el mock oficial de la librería
 jest.mock("@react-native-async-storage/async-storage", () =>
-  require("@react-native-async-storage/async-storage/jest/async-storage-mock")
+  require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
 );
 
 // Mock de NetInfo: capturamos el listener para poder dispararlo manualmente
@@ -68,7 +68,7 @@ describe("useOfflineCache", () => {
    */
   it("cuando la API responde OK → guarda en cache y isOffline = false", async () => {
     const { result } = renderHook(() =>
-      useOfflineCache(CACHE_KEY, successFetch)
+      useOfflineCache(CACHE_KEY, successFetch),
     );
 
     // Esperamos a que loading pase a false (el fetch terminó)
@@ -96,7 +96,7 @@ describe("useOfflineCache", () => {
     await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(MOCK_DATA));
 
     const { result } = renderHook(() =>
-      useOfflineCache(CACHE_KEY, networkErrorFetch)
+      useOfflineCache(CACHE_KEY, networkErrorFetch),
     );
 
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -118,9 +118,7 @@ describe("useOfflineCache", () => {
     // fetch que tarda mucho (no queremos que complete durante este test)
     const slowFetch = jest.fn(() => new Promise(() => {}));
 
-    const { result } = renderHook(() =>
-      useOfflineCache(CACHE_KEY, slowFetch)
-    );
+    const { result } = renderHook(() => useOfflineCache(CACHE_KEY, slowFetch));
 
     // Esperamos a que el listener esté registrado
     await waitFor(() => expect(netInfoListener).not.toBeNull());
@@ -149,7 +147,7 @@ describe("useOfflineCache", () => {
    */
   it("cuando NetInfo reconecta → isOffline = false y refetch disparado", async () => {
     const { result } = renderHook(() =>
-      useOfflineCache(CACHE_KEY, successFetch)
+      useOfflineCache(CACHE_KEY, successFetch),
     );
 
     // Esperamos a que el primer load() complete
@@ -194,7 +192,7 @@ describe("useOfflineCache", () => {
    */
   it("no hay doble load() en el montaje — isFirstNetInfoEmit evita la duplicación", async () => {
     const { result } = renderHook(() =>
-      useOfflineCache(CACHE_KEY, successFetch)
+      useOfflineCache(CACHE_KEY, successFetch),
     );
 
     // Esperamos a que el hook esté estable
