@@ -20,10 +20,27 @@ import api from "../../api/API";
 import OfflineBanner from "../../components/OfflineBanner";
 import { COLORS, FONTS } from "../../constants/theme";
 import { EXERCISES_DB, MUSCLE_GROUPS } from "../../data/exercises";
+import { checkAndNotifyStreak } from "../../hooks/useNotifications";
 import { useAuthStore } from "../../store/useAuthStore";
 
 const { width } = Dimensions.get("window");
 
+/**
+ * Pantalla de Rutinas — módulo central de registro de entrenamientos.
+ *
+ * Implementa el patrón offline dual completo:
+ *   - Capa 1 (proactiva): suscripción NetInfo → muestra el banner en cuanto
+ *     se pierde conexión, sin esperar a que falle ningún fetch.
+ *   - Capa 2 (reactiva): try/catch en fetchHistory → si el fetch falla con
+ *     "Network Error" (sin response HTTP), carga los datos del caché de
+ *     AsyncStorage y activa el banner.
+ *
+ * La ref `isFirstNetInfoEmit` evita que la suscripción NetInfo duplique
+ * la llamada a fetchHistory que ya se hace en el useEffect de montaje.
+ *
+ * Paginación: se carga de 4 en 4 registros (LIMIT=4). La página 1 se
+ * persiste en AsyncStorage para uso offline.
+ */
 export default function RoutinesScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuthStore();
@@ -49,19 +66,43 @@ export default function RoutinesScreen() {
   const [loadingMore, setLoadingMore] = useState(false);
   const LIMIT = 4;
 
-  // --- NUEVOS ESTADOS PARA ELIMINACIÓN ---
+  // --- ESTADOS PARA ELIMINACIÓN ---
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState<string | null>(null);
 
-  // Flag to skip the first NetInfo emission (fires immediately on subscribe)
-  // and avoid duplicating the initial fetchHistory() call from the mount useEffect.
+  /**
+   * Bandera que evita duplicar la llamada inicial a fetchHistory.
+   *
+   * NetInfo dispara un evento de forma síncrona al suscribirse (con el
+   * estado de red actual). Sin este flag, el listener llamaría a
+   * fetchHistory justo después de que el useEffect de montaje ya lo hizo.
+   */
   const isFirstNetInfoEmit = useRef(true);
 
+  /**
+   * Lista de ejercicios filtrada por grupo muscular seleccionado.
+   * Se memoriza con useMemo para evitar recalcular en cada render.
+   */
   const filteredExercises = useMemo(() => {
     return EXERCISES_DB.filter((ex) => ex.group === selectedGroup);
   }, [selectedGroup]);
 
-  // --- FETCH HISTORIAL CON PAGINACIÓN + CACHÉ OFFLINE ---
+  /**
+   * Carga el historial de entrenamientos con soporte de paginación y caché offline.
+   *
+   * @param isNextPage - Si es true, concatena los nuevos registros al historial
+   *   existente (paginación "cargar más"). Si es false, reemplaza desde la página 1.
+   *
+   * Decisión técnica — useCallback con dependencia [page]:
+   *   Se necesita la referencia actualizada de `page` para calcular la siguiente
+   *   página. Sin useCallback, el listener NetInfo capturaría un closure desactualizado.
+   *
+   * Caso borde offline:
+   *   Solo se recurre al caché cuando el error es "Network Error" sin response HTTP
+   *   (sin internet). Otros errores (401, 500, etc.) se reportan sin tocar el caché.
+   *   La paginación offline no está soportada: si isNextPage=true y hay error de red,
+   *   simplemente se muestra un toast de error.
+   */
   const fetchHistory = useCallback(
     async (isNextPage = false) => {
       if (isNextPage) setLoadingMore(true);
@@ -83,11 +124,12 @@ export default function RoutinesScreen() {
         setPage(pageToFetch);
         setIsOffline(false);
 
-        // Persist page 1 for offline use
+        // Solo se persiste la página 1 para uso offline
         if (!isNextPage) {
           await AsyncStorage.setItem("cache:routines", JSON.stringify(newRecords));
         }
       } catch (error: any) {
+        // Capa 2: detección reactiva — el fetch falló
         const isNetworkError = !error.response && error.message === "Network Error";
         if (isNetworkError && !isNextPage) {
           const cached = await AsyncStorage.getItem("cache:routines");
@@ -108,34 +150,44 @@ export default function RoutinesScreen() {
     [page],
   );
 
+  // Carga inicial al montar la pantalla
   useEffect(() => {
     fetchHistory(false);
   }, []);
 
-  // Proactive NetInfo subscription: react to connectivity changes immediately
+  /**
+   * Capa 1 — Detección proactiva de conectividad.
+   *
+   * Se salta la primera emisión de NetInfo (que ocurre al suscribirse con el
+   * estado actual de red) para no duplicar la carga inicial ya disparada
+   * por el useEffect de montaje.
+   *
+   * Al reconectarse, se recarga desde la página 1 para mostrar datos frescos.
+   * Se hace cleanup al desmontar para evitar memory leaks.
+   */
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
-      // Skip the first emission to avoid duplicating the mount fetchHistory() call.
       if (isFirstNetInfoEmit.current) {
         isFirstNetInfoEmit.current = false;
         return;
       }
 
       if (state.isConnected === false) {
-        // No internet — show offline banner without waiting for the next fetch to fail
         setIsOffline(true);
       } else if (state.isConnected === true) {
-        // Reconnected — reload page 1 so data is fresh again
+        // Al reconectarse, se recarga desde página 1 para datos frescos
         setIsOffline(false);
         fetchHistory(false);
       }
     });
 
-    // Cleanup: remove listener on unmount to prevent memory leaks
     return () => unsubscribe();
   }, [fetchHistory]);
 
-  // --- LÓGICA DE ELIMINACIÓN ---
+  /**
+   * Elimina el entrenamiento guardado en `recordToDelete` y recarga el historial.
+   * Se muestra un modal de confirmación antes de llegar a esta función.
+   */
   const handleDeleteWorkout = async () => {
     if (!recordToDelete) return;
     try {
@@ -149,7 +201,9 @@ export default function RoutinesScreen() {
     }
   };
 
-  // --- LÓGICA DE SESIÓN ACTIVA ---
+  // --- LÓGICA DE LA SESIÓN ACTIVA ---
+
+  /** Añade un nuevo set vacío a la lista de series del ejercicio actual. */
   const addSet = () => {
     setSeries([...series, { id: Date.now().toString(), reps: "", weight: "" }]);
   };
@@ -158,6 +212,11 @@ export default function RoutinesScreen() {
     setSeries(series.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
   };
 
+  /**
+   * Valida y añade el ejercicio actual (con sus series) a la sesión en curso.
+   * Caso borde: si alguna serie tiene reps vacías, se bloquea el guardado y
+   * se avisa al usuario. El peso es opcional (se asume 0 si no se introduce).
+   */
   const addExerciseToSession = () => {
     if (!selectedExercise || series.some((s) => s.reps === "")) {
       return Toast.show({
@@ -180,6 +239,12 @@ export default function RoutinesScreen() {
     Toast.show({ type: "success", text1: "Ejercicio añadido 💪" });
   };
 
+  /**
+   * Finaliza y guarda la sesión completa en el backend.
+   * Si no se escribió nombre de rutina, se genera uno automático basado en
+   * el grupo muscular o en "Fuerza" como fallback.
+   * Tras guardar, resetea toda la pantalla al estado inicial (historial).
+   */
   const finishSession = async () => {
     if (workoutList.length === 0) {
       return Toast.show({
@@ -206,6 +271,8 @@ export default function RoutinesScreen() {
             setRoutineName("");
             setSelectedGroup("");
             fetchHistory(false);
+            // Comprobar racha y notificar si procede (fire-and-forget)
+            checkAndNotifyStreak();
           } catch (error) {
             Toast.show({ type: "error", text1: "Error al guardar sesión" });
           }

@@ -12,37 +12,60 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import api from "../../api/API";
+import OfflineBanner from "../../components/OfflineBanner";
 import { COLORS, FONTS } from "../../constants/theme";
 import achievementsData from "../../data/achievements.json";
+import { useOfflineCache } from "../../hooks/useOfflineCache";
+import { checkAndNotifyAchievements } from "../../hooks/useNotifications";
 import { useAuthStore } from "../../store/useAuthStore";
 
 const { width } = Dimensions.get("window");
 
+/**
+ * Pantalla de logros — muestra el sistema de reconocimientos basado en volumen total levantado.
+ *
+ * Delega la gestión offline al hook `useOfflineCache`, que implementa el patrón
+ * offline dual (NetInfo proactivo + try/catch reactivo) y gestiona el caché en AsyncStorage.
+ *
+ * Los logros no se guardan en el servidor: son datos locales (`achievements.json`)
+ * que se desbloquean cuando el volumen total acumulado supera el umbral de cada logro.
+ * Solo el volumen total viene de la API.
+ *
+ * `useMemo` en `filteredAchievements` evita recalcular el filtro en cada render;
+ * solo se recalcula cuando cambia el filtro seleccionado.
+ */
 export default function AchievementsScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuthStore();
   const [filter, setFilter] = useState("Todos");
-  const [totalWeight, setTotalWeight] = useState(0);
-  const [loading, setLoading] = useState(true);
 
   const categories = ["Todos", "Bronce", "Plata", "Oro", "Épico"];
 
-  useEffect(() => {
-    fetchTotalVolume();
-  }, []);
-
-  const fetchTotalVolume = async () => {
-    try {
+  const { data: totalWeight, loading, isOffline } = useOfflineCache<number>(
+    "cache:total-volume",
+    async () => {
       const res = await api.get("/workouts/total-volume");
-      const volume =
-        res.data.totalVolume ?? res.data.totalWeight ?? res.data ?? 0;
-      setTotalWeight(Number(volume));
-    } catch (error) {
-      console.error("Error al obtener volumen:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return Number(res.data.totalVolume ?? res.data.totalWeight ?? res.data ?? 0);
+    },
+  );
+
+  const volume = totalWeight ?? 0;
+
+  // Cuando el volumen ya se ha cargado, detectar logros recién desbloqueados y notificar
+  useEffect(() => {
+    if (loading || volume === 0) return;
+
+    const unlockedIds = achievementsData
+      .filter((ach) => volume >= ach.targetWeight)
+      .map((ach) => ach.id);
+
+    const titleMap = Object.fromEntries(
+      achievementsData.map((ach) => [ach.id, ach.title]),
+    );
+
+    // fire-and-forget: no bloquea el render
+    checkAndNotifyAchievements(unlockedIds, titleMap);
+  }, [volume, loading]);
 
   const filteredAchievements = useMemo(() => {
     return filter === "Todos"
@@ -51,8 +74,8 @@ export default function AchievementsScreen() {
   }, [filter]);
 
   const renderAchievement = ({ item }: { item: any }) => {
-    const isUnlocked = totalWeight >= item.targetWeight;
-    const progress = Math.min((totalWeight / item.targetWeight) * 100, 100);
+    const isUnlocked = volume >= item.targetWeight;
+    const progress = Math.min((volume / item.targetWeight) * 100, 100);
 
     return (
       <View style={[styles.card, !isUnlocked && styles.cardLocked]}>
@@ -100,7 +123,7 @@ export default function AchievementsScreen() {
             <View style={styles.progressInfo}>
               <Text style={styles.progressPercent}>{progress.toFixed(0)}%</Text>
               <Text style={styles.progressText}>
-                Faltan {(item.targetWeight - totalWeight).toLocaleString()} kg
+                Faltan {(item.targetWeight - volume).toLocaleString()} kg
               </Text>
             </View>
           </View>
@@ -118,6 +141,7 @@ export default function AchievementsScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
+      <OfflineBanner visible={isOffline} />
       {/* HEADER */}
       <View style={styles.header}>
         <View style={{ flex: 1 }}>
@@ -129,7 +153,7 @@ export default function AchievementsScreen() {
         <View style={styles.volumeBadge}>
           <Text style={styles.volumeLabel}>VOLUMEN TOTAL</Text>
           <Text style={styles.volumeValue}>
-            {totalWeight.toLocaleString()} kg
+            {volume.toLocaleString()} kg
           </Text>
         </View>
       </View>
