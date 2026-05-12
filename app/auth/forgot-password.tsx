@@ -10,6 +10,18 @@ import {
 import { ForgotPasswordForm } from "../../components/auth/ForgotPasswordForm";
 import { COLORS } from "../../constants/theme";
 
+/**
+ * Pantalla de recuperación de contraseña.
+ *
+ * Actúa como contenedor visual para `ForgotPasswordForm`.
+ * La funcionalidad real de envío de correo está pendiente de implementar
+ * en el backend (ver `ForgotPasswordForm` — badge "En desarrollo").
+ *
+ * La opacidad de la imagen de fondo es ligeramente mayor que en login/register
+ * (0.2 vs 0.15) al ser una pantalla más simple con menos elementos visuales.
+ *
+ * Navegación: `router.back()` regresa a la pantalla anterior (login).
+ */
 export default function ForgotPasswordPage() {
   const router = useRouter();
 

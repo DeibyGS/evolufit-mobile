@@ -20,13 +20,30 @@ const messages = [
   "Encendiendo la motivación...",
 ];
 
+/**
+ * Loader de pantalla completa mostrado durante el cold start del servidor en Render.
+ *
+ * El servidor gratuito de Render se duerme tras 15 minutos de inactividad.
+ * Al despertar tarda hasta 30 segundos, durante los cuales este componente
+ * ocupa toda la pantalla para evitar mostrar una UI rota o incompleta.
+ *
+ * Comportamiento de la animación:
+ * - Cada 4 segundos rota al siguiente mensaje motivacional.
+ * - `Animated.sequence` ejecuta fade-out (500ms) + fade-in (500ms) de forma encadenada.
+ * - `setTimeout` de 500ms retrasa el cambio de texto hasta el punto medio del fade-out,
+ *   evitando que el usuario vea el texto antiguo mientras desaparece.
+ *
+ * @decision `useNativeDriver: true` delega la animación de opacidad al hilo nativo
+ *           (no al hilo de JS), lo que garantiza 60fps incluso si JS está ocupado
+ *           procesando la respuesta inicial del servidor.
+ */
 export const FullPageLoader = () => {
   const [msgIndex, setMsgIndex] = useState(0);
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     const interval = setInterval(() => {
-      // Animación sutil de desvanecimiento al cambiar el texto
+      // Fade-out → fade-in encadenados para una transición suave entre mensajes
       Animated.sequence([
         Animated.timing(fadeAnim, {
           toValue: 0,
@@ -40,6 +57,8 @@ export const FullPageLoader = () => {
         }),
       ]).start();
 
+      // Cambiamos el mensaje en el punto medio del fade-out (500ms),
+      // cuando el texto ya es invisible, para evitar el parpadeo de contenido.
       setTimeout(() => {
         setMsgIndex((prev) => (prev + 1) % messages.length);
       }, 500);

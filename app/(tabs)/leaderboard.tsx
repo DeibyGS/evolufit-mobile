@@ -31,16 +31,36 @@ export default function LeaderboardScreen() {
   const [isOffline, setIsOffline] = useState(false);
   const LIMIT = 10;
 
-  // Flag to skip the first NetInfo emission (fires immediately on subscribe)
-  // and avoid duplicating the initial fetchLeaderboard() call from useFocusEffect.
+  /**
+   * Bandera para ignorar la primera emisión de NetInfo al suscribirse.
+   * Sin esta ref, la emisión inicial duplicaría la carga que ya ejecuta useFocusEffect.
+   * Se usa useRef (no useState) porque cambiar este flag no debe causar re-render.
+   */
   const isFirstNetInfoEmit = useRef(true);
 
+  /**
+   * useFocusEffect en lugar de useEffect para recargar el ranking cada vez
+   * que el usuario navega a esta pantalla (no solo al montarla por primera vez).
+   * Esto es importante porque otro usuario puede haber registrado un nuevo récord
+   * mientras navegabas por otras pantallas — el leaderboard debe estar siempre actualizado.
+   */
   useFocusEffect(
     useCallback(() => {
       fetchLeaderboard(1, true);
     }, []),
   );
 
+  /**
+   * Obtiene el ranking de récords 1RM paginado desde la API.
+   *
+   * Se envuelve en useCallback con dependencias vacías [] porque no captura
+   * ningún estado externo — usa setRanking con función updater para acceder
+   * al estado anterior sin necesitar ranking como dependencia.
+   * Esto es necesario para que el useEffect de NetInfo no entre en bucle infinito.
+   *
+   * @param pageNumber - Número de página a cargar (por defecto 1)
+   * @param isInitial - true activa el spinner de carga completa, false activa el de "cargando más"
+   */
   const fetchLeaderboard = useCallback(async (pageNumber = 1, isInitial = false) => {
     try {
       if (isInitial) setLoading(true);
@@ -56,8 +76,12 @@ export default function LeaderboardScreen() {
       setRanking((prev) => (isInitial ? newItems : [...prev, ...newItems]));
       setHasNextPage(moreExist);
       setPage(pageNumber);
+      // Si la petición tuvo éxito, la conexión se restableció — ocultar el banner
       setIsOffline(false);
     } catch (error: any) {
+      // Distinguimos error de red de error de servidor
+      // !error.response → Axios no recibió respuesta del servidor (sin conexión)
+      // error.message === "Network Error" → confirmación de Axios para errores de red
       const isNetworkError = !error.response && error.message === "Network Error";
       if (isNetworkError) {
         setIsOffline(true);
@@ -70,26 +94,28 @@ export default function LeaderboardScreen() {
     }
   }, []);
 
-  // Proactive NetInfo subscription: react to connectivity changes immediately
+  /**
+   * Suscripción proactiva a cambios de conectividad (Capa 1 del patrón offline dual).
+   * Detecta la pérdida de red antes de que falle el siguiente fetch.
+   * Al reconectar, recarga desde la página 1 para mostrar datos actualizados.
+   */
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
-      // Skip the first emission to avoid duplicating the useFocusEffect load call.
+      // Ignoramos la primera emisión para no duplicar la carga inicial de useFocusEffect
       if (isFirstNetInfoEmit.current) {
         isFirstNetInfoEmit.current = false;
         return;
       }
 
       if (state.isConnected === false) {
-        // No internet — show offline banner without waiting for the next fetch to fail
         setIsOffline(true);
       } else if (state.isConnected === true) {
-        // Reconnected — reload page 1 so data is fresh again
         setIsOffline(false);
         fetchLeaderboard(1, true);
       }
     });
 
-    // Cleanup: remove listener on unmount to prevent memory leaks
+    // Al desmontar el componente, eliminamos el listener para evitar fugas de memoria
     return () => unsubscribe();
   }, [fetchLeaderboard]);
 

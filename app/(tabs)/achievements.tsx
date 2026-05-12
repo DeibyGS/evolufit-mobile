@@ -15,8 +15,8 @@ import api from "../../api/API";
 import OfflineBanner from "../../components/OfflineBanner";
 import { COLORS, FONTS } from "../../constants/theme";
 import achievementsData from "../../data/achievements.json";
-import { useOfflineCache } from "../../hooks/useOfflineCache";
 import { checkAndNotifyAchievements } from "../../hooks/useNotifications";
+import { useOfflineCache } from "../../hooks/useOfflineCache";
 import { useAuthStore } from "../../store/useAuthStore";
 
 const { width } = Dimensions.get("window");
@@ -41,13 +41,16 @@ export default function AchievementsScreen() {
 
   const categories = ["Todos", "Bronce", "Plata", "Oro", "Épico"];
 
-  const { data: totalWeight, loading, isOffline } = useOfflineCache<number>(
-    "cache:total-volume",
-    async () => {
-      const res = await api.get("/workouts/total-volume");
-      return Number(res.data.totalVolume ?? res.data.totalWeight ?? res.data ?? 0);
-    },
-  );
+  const {
+    data: totalWeight,
+    loading,
+    isOffline,
+  } = useOfflineCache<number>("cache:total-volume", async () => {
+    const res = await api.get("/workouts/total-volume");
+    return Number(
+      res.data.totalVolume ?? res.data.totalWeight ?? res.data ?? 0,
+    );
+  });
 
   const volume = totalWeight ?? 0;
 
@@ -59,12 +62,12 @@ export default function AchievementsScreen() {
       .filter((ach) => volume >= ach.targetWeight)
       .map((ach) => ach.id);
 
-    const titleMap = Object.fromEntries(
+    const achievementTitles = Object.fromEntries(
       achievementsData.map((ach) => [ach.id, ach.title]),
     );
 
     // fire-and-forget: no bloquea el render
-    checkAndNotifyAchievements(unlockedIds, titleMap);
+    checkAndNotifyAchievements(unlockedIds);
   }, [volume, loading]);
 
   const filteredAchievements = useMemo(() => {
@@ -152,9 +155,7 @@ export default function AchievementsScreen() {
         </View>
         <View style={styles.volumeBadge}>
           <Text style={styles.volumeLabel}>VOLUMEN TOTAL</Text>
-          <Text style={styles.volumeValue}>
-            {volume.toLocaleString()} kg
-          </Text>
+          <Text style={styles.volumeValue}>{volume.toLocaleString()} kg</Text>
         </View>
       </View>
 

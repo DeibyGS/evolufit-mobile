@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -15,8 +15,10 @@ import { LineChart, PieChart } from "react-native-chart-kit";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import api from "../../api/API";
+import OfflineBanner from "../../components/OfflineBanner";
 import { COLORS, FONTS } from "../../constants/theme";
 import { MUSCLE_GROUPS, MuscleGroup } from "../../data/exercises";
+import { useOfflineCache } from "../../hooks/useOfflineCache";
 import { useAuthStore } from "../../store/useAuthStore";
 
 const { width } = Dimensions.get("window");
@@ -38,37 +40,42 @@ interface Workout {
   userId: string;
 }
 
+/**
+ * Pantalla de analíticas — visualización del progreso de entrenamiento.
+ *
+ * Delega la gestión offline (caché + banner) al hook `useOfflineCache`,
+ * que implementa el patrón offline dual internamente. Esta pantalla solo
+ * consume el resultado: `{ data, loading, isOffline }`.
+ *
+ * Todos los cálculos de gráficas (volumen, reps, evolución) se derivan
+ * del mismo conjunto de workouts con useMemo, filtrando por rango de fechas
+ * y grupo muscular seleccionado.
+ */
 export default function AnalyticsScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuthStore();
 
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<MuscleGroup>("Pecho");
-  const [loading, setLoading] = useState(true);
-
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [showPicker, setShowPicker] = useState(false);
   const [pickerType, setPickerType] = useState<"start" | "end">("start");
 
-  useEffect(() => {
-    fetchWorkouts();
-  }, []);
-
-  const fetchWorkouts = async () => {
-    try {
+  /**
+   * Carga todos los entrenamientos del usuario.
+   * Se guarda sin paginación (todos los registros) porque las gráficas
+   * necesitan el historial completo para calcular tendencias y totales.
+   * El hook `useOfflineCache` persiste el resultado en AsyncStorage.
+   */
+  const { data, loading, isOffline } = useOfflineCache<Workout[]>(
+    "cache:analytics-workouts",
+    async () => {
       const res = await api.get("/workouts/my-workouts");
-      if (res.data && Array.isArray(res.data.workouts)) {
-        setWorkouts(res.data.workouts);
-      } else {
-        setWorkouts([]);
-      }
-    } catch (error) {
-      setWorkouts([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return Array.isArray(res.data?.workouts) ? res.data.workouts : [];
+    },
+  );
+
+  const workouts = data ?? [];
 
   const formattedName = user?.name
     ? user.name.charAt(0).toUpperCase() +
@@ -78,6 +85,13 @@ export default function AnalyticsScreen() {
       user.lastname.slice(1).toLowerCase()
     : "Usuario";
 
+  /**
+   * Filtra los entrenamientos según el rango de fechas seleccionado.
+   *
+   * Caso borde — fecha fin:
+   *   Se ajusta a las 23:59:59 del día seleccionado para que los entrenamientos
+   *   de ese día queden incluidos (el servidor guarda timestamps con hora).
+   */
   const filteredWorkouts = useMemo(() => {
     if (!workouts || !Array.isArray(workouts)) return [];
     let endLimit = endDate ? new Date(endDate) : null;
@@ -259,6 +273,7 @@ export default function AnalyticsScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
+      <OfflineBanner visible={isOffline} />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 60 }}

@@ -19,19 +19,34 @@ import { useAuthStore } from "../../store/useAuthStore";
 
 const { width } = Dimensions.get("window");
 
+/**
+ * Pantalla principal de la app (hub de navegación).
+ *
+ * Esta pantalla no realiza peticiones HTTP, por lo que solo implementa
+ * la Capa 1 del patrón offline dual: suscripción proactiva a NetInfo
+ * para mostrar el banner de sin conexión sin necesitar esperar un fetch.
+ */
 export default function DashboardScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
 
-  // ESTADO PARA EL MODAL DE CONFIRMACIÓN (Consistente con Profile)
+  // Estado para el modal de confirmación de cierre de sesión
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  // Offline state: controlled exclusively by the NetInfo subscription below
+  // Estado offline controlado exclusivamente por la suscripción NetInfo
   const [isOffline, setIsOffline] = useState(false);
 
-  // Proactive NetInfo subscription: show banner as soon as connectivity is lost
+  /**
+   * Capa 1 — Detección proactiva de conectividad.
+   *
+   * NetInfo emite un evento inmediatamente al suscribirse (con el estado
+   * actual de red) y luego cada vez que cambia. Aquí solo actualizamos
+   * el banner: no hay fetch que relanzar porque el Dashboard no carga datos.
+   *
+   * Se hace cleanup al desmontar para evitar memory leaks.
+   */
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
       if (state.isConnected === false) {
@@ -41,7 +56,6 @@ export default function DashboardScreen() {
       }
     });
 
-    // Cleanup: remove listener on unmount to prevent memory leaks
     return () => unsubscribe();
   }, []);
 
@@ -49,6 +63,11 @@ export default function DashboardScreen() {
     setShowLogoutModal(true);
   };
 
+  /**
+   * Definición estática del grid de navegación.
+   * Cada entrada lleva al módulo correspondiente de la app.
+   * El color se usa con opacidad "15" (hex) para el fondo del icono.
+   */
   const menuItems = [
     {
       title: "Dashboard Analítico",
@@ -162,7 +181,7 @@ export default function DashboardScreen() {
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* MODAL DE CONFIRMACIÓN (Idéntico al de Profile para consistencia) */}
+      {/* MODAL DE CONFIRMACIÓN — diseño idéntico al de Profile para consistencia visual */}
       <Modal visible={showLogoutModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>

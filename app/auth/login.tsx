@@ -12,6 +12,20 @@ import {
 import { LoginForm } from "../../components/auth/LoginForm";
 import { COLORS, FONTS } from "../../constants/theme";
 
+/**
+ * Pantalla de inicio de sesión.
+ *
+ * Esta pantalla actúa como contenedor visual (layout) para el
+ * componente `LoginForm`, que contiene toda la lógica de autenticación.
+ * La separación permite reutilizar `LoginForm` en otros contextos
+ * si fuera necesario.
+ *
+ * La imagen de fondo (Hero.png) se muestra con opacidad 0.15 para
+ * mantener el branding sin distraer del formulario principal.
+ *
+ * Navegación: al pulsar "atrás" se regresa a la ruta anterior en la
+ * pila del navigator (normalmente la landing `/`).
+ */
 export default function LoginPage() {
   const router = useRouter();
 
@@ -36,7 +50,7 @@ export default function LoginPage() {
           <LoginForm />
         </View>
 
-        {/* BRANDING FINAL (Igual que en el Menú Hamburguesa) */}
+        {/* BRANDING INFERIOR — mismo patrón visual que en el menú hamburguesa */}
         <View style={styles.footerBranding}>
           <Text style={styles.footerLogoText}>
             Evolut<Text style={{ color: COLORS.orange }}>Fit</Text>
@@ -74,16 +88,16 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     flex: 1,
-    justifyContent: "center", // Centra el formulario verticalmente
+    justifyContent: "center", // Centra el formulario verticalmente en la pantalla
   },
-  // ESTILOS DEL BRANDING INFERIOR
   footerBranding: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingBottom: 40, // Espacio desde el borde inferior
+    paddingBottom: 40,
     gap: 10,
-    opacity: 0.5, // Sutil para no distraer del botón de Login
+    // Opacidad reducida para que el branding no compita visualmente con el formulario
+    opacity: 0.5,
   },
   footerLogoText: {
     fontFamily: FONTS.secondaryBold,
