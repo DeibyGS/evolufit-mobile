@@ -14,6 +14,16 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { Button } from "../ui/Button";
 import { FullPageLoader } from "../ui/FullPageLoader";
 
+/**
+ * Formulario de inicio de sesión con validación en dos capas.
+ *
+ * Capa 1 (frontend): comprueba que los campos no estén vacíos antes de hacer la petición.
+ * Capa 2 (backend): procesa los errores Zod devueltos por la API y los asigna
+ * al campo correspondiente del formulario mediante el mapa de errores `errors`.
+ *
+ * Al iniciar sesión correctamente, guarda `user` y `token` en el store de Zustand
+ * (que los persiste en AsyncStorage vía middleware `persist`) y redirige a la app.
+ */
 export const LoginForm = () => {
   const router = useRouter();
   const login = useAuthStore((state) => state.login);

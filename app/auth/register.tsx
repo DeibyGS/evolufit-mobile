@@ -15,19 +15,35 @@ import {
 import { RegisterForm } from "../../components/auth/RegisterForm";
 import { COLORS, FONTS } from "../../constants/theme";
 
+/**
+ * Pantalla de registro de nuevo usuario.
+ *
+ * A diferencia de la pantalla de login, aquí se necesitan dos capas extra:
+ * - `KeyboardAvoidingView`: el formulario de registro tiene varios campos,
+ *   y en iOS el teclado puede tapar los últimos inputs si no se ajusta
+ *   el comportamiento (en Android el sistema lo maneja con "height").
+ * - `ScrollView`: el formulario es más largo que la pantalla en dispositivos
+ *   pequeños, por lo que necesita ser desplazable.
+ *
+ * Navegación: al pulsar "atrás" se redirige a `/` con `replace` (no `back`)
+ * para evitar que el usuario quede atrapado en un estado de pila inconsistente
+ * si llegó aquí desde la landing page.
+ */
 export default function RegisterPage() {
   const router = useRouter();
 
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
+      // iOS: desplaza la pantalla hacia arriba; Android: reduce la altura del contenido
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <View style={styles.container}>
         <ImageBackground
           source={require("../../assets/images/Hero.png")}
           style={styles.background}
-          imageStyle={{ opacity: 0.15 }} // Bajamos un poco la opacidad como en el Login
+          // Opacidad reducida igual que en login para mantener coherencia visual
+          imageStyle={{ opacity: 0.15 }}
         >
           {/* BOTÓN VOLVER */}
           <TouchableOpacity
@@ -44,7 +60,7 @@ export default function RegisterPage() {
             {/* FORMULARIO DE REGISTRO */}
             <RegisterForm />
 
-            {/* BRANDING FINAL (Al final del scroll) */}
+            {/* BRANDING AL FINAL DEL SCROLL — queda visible al llegar al final del formulario */}
             <View style={styles.footerBranding}>
               <Text style={styles.footerLogoText}>
                 Evolut<Text style={{ color: COLORS.orange }}>Fit</Text>
@@ -72,6 +88,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   scrollContent: {
+    // paddingTop deja espacio para el botón "atrás" posicionado absolutamente
     paddingTop: 120,
     paddingBottom: 40,
   },
@@ -86,12 +103,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255, 165, 0, 0.3)",
   },
-  // ESTILOS DEL BRANDING INFERIOR
   footerBranding: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 40, // Espacio después del formulario
+    marginTop: 40,
     gap: 10,
     opacity: 0.5,
   },

@@ -32,8 +32,13 @@ export default function CommunityScreen() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
 
-  // Flag to skip the first NetInfo emission (fires immediately on subscribe)
-  // and avoid duplicating the initial fetchPosts() call from the mount useEffect.
+  /**
+   * Bandera para ignorar la primera emisión de NetInfo.
+   * Al suscribirse, NetInfo dispara inmediatamente con el estado actual de red.
+   * Sin esta ref, esa emisión inicial llamaría a fetchPosts() por segunda vez,
+   * duplicando la petición que ya hace el useEffect de búsqueda al montar.
+   * Se usa useRef (no useState) porque cambiar este flag no debe causar re-render.
+   */
   const isFirstNetInfoEmit = useRef(true);
 
   const [search, setSearch] = useState("");
@@ -49,6 +54,18 @@ export default function CommunityScreen() {
     tags: [] as string[],
   });
 
+  /**
+   * Carga publicaciones desde la API con soporte para paginación.
+   *
+   * Se envuelve en useCallback porque es dependencia del useEffect de NetInfo.
+   * Sin useCallback, la función se recrearía en cada render y el useEffect
+   * se re-ejecutaría en bucle infinito.
+   *
+   * No implementa caché AsyncStorage porque el contenido de comunidad cambia
+   * constantemente — mostrar posts desactualizados offline aportaría poco valor.
+   *
+   * @param isNextPage - true para cargar la siguiente página, false para reiniciar desde la 1
+   */
   const fetchPosts = useCallback(
     async (isNextPage = false) => {
       if (isNextPage) setLoadingMore(true);
@@ -70,8 +87,12 @@ export default function CommunityScreen() {
         setPosts((prev) => (isNextPage ? [...prev, ...newPosts] : newPosts));
         setHasNextPage(next);
         setPage(currentPage);
+        // Si la petición tuvo éxito, la conexión se restableció — ocultar el banner
         setIsOffline(false);
       } catch (error: any) {
+        // Distinguimos error de red (sin respuesta del servidor) de error de servidor (con respuesta).
+        // !error.response → Axios no recibió respuesta (timeout, sin red)
+        // error.message === "Network Error" → confirmación de Axios para errores de conectividad
         const isNetworkError = !error.response && error.message === "Network Error";
         if (isNetworkError) {
           setIsOffline(true);
@@ -90,6 +111,11 @@ export default function CommunityScreen() {
     [filterMuscle, search, sortBy, page],
   );
 
+  /**
+   * Recarga los posts cuando cambian los filtros de búsqueda.
+   * El debounce de 500ms evita lanzar una petición por cada tecla pulsada
+   * en el campo de búsqueda — espera a que el usuario deje de escribir.
+   */
   useEffect(() => {
     const delay = setTimeout(() => {
       setPage(1);
@@ -98,26 +124,29 @@ export default function CommunityScreen() {
     return () => clearTimeout(delay);
   }, [filterMuscle, search, sortBy]);
 
-  // Proactive NetInfo subscription: react to connectivity changes immediately
+  /**
+   * Suscripción proactiva a cambios de conectividad (Capa 1 del patrón offline dual).
+   * Detecta la pérdida de red ANTES de que falle el siguiente fetch,
+   * mostrando el banner inmediatamente sin esperar al error.
+   * Al reconectar, recarga la página 1 para mostrar datos actualizados.
+   */
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
-      // Skip the first emission to avoid duplicating the mount fetchPosts() call.
+      // Ignoramos la primera emisión para no duplicar la carga inicial del componente
       if (isFirstNetInfoEmit.current) {
         isFirstNetInfoEmit.current = false;
         return;
       }
 
       if (state.isConnected === false) {
-        // No internet — show offline banner without waiting for the next fetch to fail
         setIsOffline(true);
       } else if (state.isConnected === true) {
-        // Reconnected — reload page 1 so data is fresh again
         setIsOffline(false);
         fetchPosts(false);
       }
     });
 
-    // Cleanup: remove listener on unmount to prevent memory leaks
+    // Al desmontar el componente, eliminamos el listener para evitar fugas de memoria
     return () => unsubscribe();
   }, [fetchPosts]);
 

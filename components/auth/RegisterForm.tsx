@@ -1,13 +1,7 @@
 import Checkbox from "expo-checkbox";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import {
-    Alert,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
-} from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import api from "../../api/API";
 import { COLORS, FONTS, SIZES } from "../../constants/theme";
 import { Button } from "../ui/Button";

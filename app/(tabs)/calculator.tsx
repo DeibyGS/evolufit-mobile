@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -12,8 +12,26 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import api from "../../api/API";
+import OfflineBanner from "../../components/OfflineBanner";
 import { COLORS, FONTS } from "../../constants/theme";
+import { useOfflineCache } from "../../hooks/useOfflineCache";
 
+/**
+ * Pantalla de calculadora de salud (IMC, TMB y TDEE).
+ *
+ * Flujo principal:
+ * 1. El usuario introduce sus datos biométricos en el formulario.
+ * 2. `handleCalculate` valida los datos localmente y calcula IMC, TMB y TDEE en el cliente.
+ * 3. Los resultados se envían al backend para persistirlos (el backend no los recalcula).
+ * 4. El historial de cálculos se carga con `useOfflineCache`, que gestiona el caché offline.
+ *
+ * `useOfflineCache` devuelve `{ data, loading, isOffline, refetch }`. Se llama a
+ * `refetch()` después de guardar un nuevo cálculo para actualizar el historial sin
+ * recargar toda la pantalla.
+ *
+ * `sortedHistory` se ordena por IMC (no por fecha) para facilitar la comparación
+ * visual de la progresión. Se usa `useMemo` para no recalcularlo en cada render.
+ */
 export default function HealthCalculator() {
   const insets = useSafeAreaInsets();
 
@@ -26,29 +44,20 @@ export default function HealthCalculator() {
     activity: "1.2",
   });
 
-  const [errors, setErrors] = useState<any>({}); // Estado para errores por campo
+  const [errors, setErrors] = useState<any>({});
   const [results, setResults] = useState<any>(null);
-  const [history, setHistory] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isCalculated, setIsCalculated] = useState(false);
   const [emptyState, setEmptyState] = useState(false);
 
-  useEffect(() => {
-    fetchHistory();
-  }, []);
-
-  const fetchHistory = async () => {
-    try {
+  const { data: fetchedHistory, loading, isOffline, refetch } = useOfflineCache<any[]>(
+    "cache:health-history",
+    async () => {
       const res = await api.get("/health");
-      setHistory(
-        Array.isArray(res.data) ? res.data : res.data ? [res.data] : [],
-      );
-    } catch (error) {
-      console.error("Error al cargar historial");
-    } finally {
-      setLoading(false);
-    }
-  };
+      return Array.isArray(res.data) ? res.data : res.data ? [res.data] : [];
+    },
+  );
+
+  const history = fetchedHistory ?? [];
 
   const sortedHistory = useMemo(() => {
     return [...history].sort((a, b) => a.imc - b.imc);
@@ -119,7 +128,7 @@ export default function HealthCalculator() {
         gender: "hombre",
         activity: "1.2",
       });
-      fetchHistory();
+      refetch();
     } catch (error: any) {
       const data = error.response?.data;
 
@@ -164,6 +173,7 @@ export default function HealthCalculator() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
+      <OfflineBanner visible={isOffline} />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
