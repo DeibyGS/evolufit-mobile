@@ -136,6 +136,7 @@ export default function RMCalculatorScreen() {
 
   // Proactive NetInfo subscription: react to connectivity changes immediately
   useEffect(() => {
+    isFirstNetInfoEmit.current = true;
     const unsubscribe = NetInfo.addEventListener((state) => {
       // Skip the first emission to avoid duplicating the mount fetchSavedRMs() call.
       if (isFirstNetInfoEmit.current) {

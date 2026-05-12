@@ -166,6 +166,7 @@ export default function RoutinesScreen() {
    * Se hace cleanup al desmontar para evitar memory leaks.
    */
   useEffect(() => {
+    isFirstNetInfoEmit.current = true;
     const unsubscribe = NetInfo.addEventListener((state) => {
       if (isFirstNetInfoEmit.current) {
         isFirstNetInfoEmit.current = false;
