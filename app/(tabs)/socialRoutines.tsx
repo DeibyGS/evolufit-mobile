@@ -79,7 +79,7 @@ export default function CommunityScreen() {
             search,
             sort: sortBy,
             page: currentPage,
-            limit: 10,
+            limit: 8,
           },
         });
 
