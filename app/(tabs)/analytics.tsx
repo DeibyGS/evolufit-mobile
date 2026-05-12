@@ -70,7 +70,7 @@ export default function AnalyticsScreen() {
   const { data, loading, isOffline } = useOfflineCache<Workout[]>(
     "cache:analytics-workouts",
     async () => {
-      const res = await api.get("/workouts/my-workouts");
+      const res = await api.get("/workouts/my-workouts", { params: { limit: 500 } });
       return Array.isArray(res.data?.workouts) ? res.data.workouts : [];
     },
   );

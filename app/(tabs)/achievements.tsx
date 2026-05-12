@@ -62,10 +62,6 @@ export default function AchievementsScreen() {
       .filter((ach) => volume >= ach.targetWeight)
       .map((ach) => ach.id);
 
-    const achievementTitles = Object.fromEntries(
-      achievementsData.map((ach) => [ach.id, ach.title]),
-    );
-
     // fire-and-forget: no bloquea el render
     checkAndNotifyAchievements(unlockedIds);
   }, [volume, loading]);
