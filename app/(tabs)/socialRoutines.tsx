@@ -453,7 +453,7 @@ export default function CommunityScreen() {
                   <Text style={styles.loadMoreText}>Ver más rutinas</Text>
                   <Ionicons
                     name="chevron-down"
-                    size={18}
+                    size={16}
                     color={COLORS.orange}
                   />
                 </>
@@ -714,20 +714,16 @@ const styles = StyleSheet.create({
   detailBtnText: { color: "#000", fontWeight: "bold", fontSize: 12 },
 
   loadMoreBtn: {
-    flexDirection: "row",
+    padding: 15,
     alignItems: "center",
+    flexDirection: "row",
     justifyContent: "center",
+    gap: 8,
     marginTop: 10,
     marginBottom: 30,
-    backgroundColor: "#1a1a1a",
-    paddingVertical: 14,
-    borderRadius: 15,
-    gap: 10,
-    borderWidth: 1,
-    borderColor: "#333",
   },
   loadMoreText: {
-    color: "#fff",
+    color: COLORS.orange,
     fontFamily: FONTS.secondaryBold,
     fontSize: 14,
   },
