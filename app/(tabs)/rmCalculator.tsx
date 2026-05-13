@@ -496,7 +496,10 @@ export default function RMCalculatorScreen() {
             {loadingMore ? (
               <ActivityIndicator color={COLORS.orange} />
             ) : (
-              <Text style={styles.loadMoreText}>Ver más registros</Text>
+              <>
+                <Text style={styles.loadMoreText}>Ver más registros</Text>
+                <Ionicons name="chevron-down" size={16} color={COLORS.orange} />
+              </>
             )}
           </TouchableOpacity>
         )}
@@ -712,8 +715,15 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 77, 77, 0.05)",
     borderRadius: 10,
   },
-  loadMoreBtn: { padding: 15, alignItems: "center" },
-  loadMoreText: { color: COLORS.orange, fontFamily: FONTS.secondaryBold },
+  loadMoreBtn: {
+    padding: 15,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
+    marginTop: 10,
+  },
+  loadMoreText: { color: COLORS.orange, fontFamily: FONTS.secondaryBold, fontSize: 14 },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.85)",
