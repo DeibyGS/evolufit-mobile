@@ -64,7 +64,7 @@ export default function RoutinesScreen() {
   const [page, setPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const LIMIT = 4;
+  const LIMIT = 8;
 
   // --- ESTADOS PARA ELIMINACIÓN ---
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -166,8 +166,6 @@ export default function RoutinesScreen() {
    * Se hace cleanup al desmontar para evitar memory leaks.
    */
   useEffect(() => {
-    // Reset on every effect run so re-subscriptions (triggered by page changes)
-    // don't fire fetchHistory(false) spuriously and reset pagination.
     isFirstNetInfoEmit.current = true;
     const unsubscribe = NetInfo.addEventListener((state) => {
       if (isFirstNetInfoEmit.current) {

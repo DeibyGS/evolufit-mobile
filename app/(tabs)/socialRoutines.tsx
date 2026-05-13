@@ -79,7 +79,7 @@ export default function CommunityScreen() {
             search,
             sort: sortBy,
             page: currentPage,
-            limit: 10,
+            limit: 8,
           },
         });
 
@@ -131,6 +131,7 @@ export default function CommunityScreen() {
    * Al reconectar, recarga la página 1 para mostrar datos actualizados.
    */
   useEffect(() => {
+    isFirstNetInfoEmit.current = true;
     const unsubscribe = NetInfo.addEventListener((state) => {
       // Ignoramos la primera emisión para no duplicar la carga inicial del componente
       if (isFirstNetInfoEmit.current) {

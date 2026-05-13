@@ -48,7 +48,7 @@ export default function RMCalculatorScreen() {
   const [page, setPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const LIMIT = 4;
+  const LIMIT = 8;
 
   // ESTADOS PARA EL MODAL DE ELIMINAR
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -136,8 +136,6 @@ export default function RMCalculatorScreen() {
 
   // Proactive NetInfo subscription: react to connectivity changes immediately
   useEffect(() => {
-    // Reset on every effect run so re-subscriptions (triggered by page changes)
-    // don't fire fetchSavedRMs(false) spuriously and reset pagination.
     isFirstNetInfoEmit.current = true;
     const unsubscribe = NetInfo.addEventListener((state) => {
       // Skip the first emission to avoid duplicating the mount fetchSavedRMs() call.

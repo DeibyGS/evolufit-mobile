@@ -15,6 +15,7 @@
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
+import achievementsData from "../data/achievements.json";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -199,8 +200,10 @@ const SEEN_ACHIEVEMENTS_KEY = "notifications:seen_achievements";
  */
 export async function checkAndNotifyAchievements(
   unlockedIds: string[],
-  achievementsMap: Record<string, string>,
 ): Promise<void> {
+  const achievementsMap = Object.fromEntries(
+    achievementsData.map((a: { id: string; title: string }) => [a.id, a.title]),
+  );
   const prefs = await getNotificationPrefs();
   if (!prefs.achievementAlert) return;
 
