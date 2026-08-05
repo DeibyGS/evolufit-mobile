@@ -159,7 +159,7 @@ export default function ProfileScreen() {
       isDanger: true,
       onConfirm: async () => {
         try {
-          await api.delete(`/users/${user?._id}`);
+          await api.delete(`/users/delete-me`);
           logout();
           router.replace("/auth/login");
           Toast.show({
