@@ -1,167 +1,167 @@
 # 📱 EvolutFit - Mobile App
 
-**EvolutFit** es la aplicación móvil del proyecto de gestión integral de entrenamiento y salud. Desarrollada con **React Native** y **Expo (SDK 54)**, ofrece una experiencia completa para registrar sesiones, consultar analíticas de progreso, calcular el **1RM**, seguir un leaderboard comunitario y recibir recordatorios de entrenamiento, todo con soporte **offline**.
+**EvolutFit** is the mobile application of the comprehensive workout and health management project. Built with **React Native** and **Expo (SDK 54)**, it provides a full experience to log sessions, view progress analytics, calculate your **1RM**, follow a community leaderboard, and receive workout reminders — all with **offline** support.
 
 ---
 
 ## ✨ Core Highlights
 
-- **Expo Router (File-based):** Navegación declarativa con rutas tipadas (`typedRoutes`).
-- **Soporte Offline:** Detección proactiva de conectividad con `@react-native-community/netinfo`, banner de estado y caché de peticiones (`useOfflineCache`).
-- **Notificaciones Push Locales:** Recordatorios de entrenamiento programados con `expo-notifications`.
-- **Analíticas de Progreso:** Gráficas de rendimiento y distribución muscular con `react-native-chart-kit`.
-- **Gamificación:** Sistema de logros, calculadora de 1RM y leaderboard global (Hall of Fame).
-- **UI Premium Dark:** Interfaz oscura con gradientes lineales y diseño consistente con el ecosistema EvolutFit.
-- **Estado Global Atómico:** `zustand` para la gestión de sesión y autenticación.
+- **Expo Router (File-based):** Declarative navigation with typed routes (`typedRoutes`).
+- **Offline Support:** Proactive connectivity detection with `@react-native-community/netinfo`, a status banner, and request caching (`useOfflineCache`).
+- **Local Push Notifications:** Scheduled workout reminders with `expo-notifications`.
+- **Progress Analytics:** Performance and muscle distribution charts with `react-native-chart-kit`.
+- **Gamification:** Achievements system, 1RM calculator, and a global leaderboard (Hall of Fame).
+- **Premium Dark UI:** Dark interface with linear gradients, consistent with the EvolutFit ecosystem.
+- **Atomic Global State:** `zustand` for session and authentication management.
 
 ---
 
-## 🛠️ Stack Tecnológico
+## 🛠️ Tech Stack
 
 ### Core
 
-- **React Native 0.81** + **Expo SDK 54**: Plataforma cross-platform (iOS / Android / Web).
-- **Expo Router 6**: Enrutado basado en el sistema de archivos, con layouts anidados y rutas protegidas.
-- **TypeScript 5.9**: Tipado estricto con `typedRoutes` habilitado.
-- **Zustand**: Gestión de estado global (auth, sesión, usuario).
+- **React Native 0.81** + **Expo SDK 54**: Cross-platform (iOS / Android / Web).
+- **Expo Router 6**: File-based routing with nested layouts and protected routes.
+- **TypeScript 5.9**: Strict typing with `typedRoutes` enabled.
+- **Zustand**: Global state management (auth, session, user).
 
-### Datos y Networking
+### Data & Networking
 
-- **Axios**: Cliente HTTP para la API REST de EvolutFit.
-- **AsyncStorage**: Persistencia local de sesión y datos cacheados.
+- **Axios**: HTTP client for the EvolutFit REST API.
+- **AsyncStorage**: Local persistence of session and cached data.
 
-### Offline y Notificaciones
+### Offline & Notifications
 
-- **@react-native-community/netinfo**: Monitor de conectividad en tiempo real.
-- **expo-notifications**: Notificaciones locales programadas (recordatorios diarios).
-- **useOfflineCache**: Patrón dual NetInfo + try/catch para resiliencia de red.
+- **@react-native-community/netinfo**: Real-time connectivity monitor.
+- **expo-notifications**: Scheduled local notifications (daily reminders).
+- **useOfflineCache**: Dual pattern NetInfo + try/catch for network resilience.
 
-### UI y Visualización
+### UI & Visualization
 
-- **expo-linear-gradient**: Fondos y superficies con degradados.
-- **react-native-chart-kit**: Gráficas de progreso y analíticas.
-- **react-native-reanimated**: Animaciones fluidas de alto rendimiento.
-- **react-native-toast-message**: Feedback visual para acciones del usuario.
+- **expo-linear-gradient**: Gradients for backgrounds and surfaces.
+- **react-native-chart-kit**: Progress and analytics charts.
+- **react-native-reanimated**: High-performance fluid animations.
+- **react-native-toast-message**: Visual feedback for user actions.
 
 ### Testing
 
-- **jest-expo**: Suite de tests con `@testing-library/react-native`.
-- **jest-html-reporters**: Reporte visual de resultados de tests.
+- **jest-expo**: Test suite with `@testing-library/react-native`.
+- **jest-html-reporters**: Visual test result report.
 
 ---
 
-## 📂 Arquitectura de Directorios
+## 📂 Directory Architecture
 
 ```text
 evolufit-mobile/
-├── app/                  # Rutas de Expo Router
-│   ├── (tabs)/           # Vistas autenticadas (Bottom Tabs)
-│   │   ├── dashboard.tsx       # Resumen y progreso
-│   │   ├── analytics.tsx       # Analíticas y gráficas
-│   │   ├── calculator.tsx      # Calculadora de métricas de salud
-│   │   ├── routines.tsx        # Gestión de entrenamientos
-│   │   ├── rmCalculator.tsx    # Calculadora de Repetición Máxima
-│   │   ├── leaderboard.tsx     # Hall of Fame global
-│   │   ├── socialRoutines.tsx  # Feed de comunidad
-│   │   ├── achievements.tsx    # Medallas y logros
-│   │   ├── notifications.tsx   # Config de notificaciones
-│   │   └── profile.tsx         # Perfil y seguridad
+├── app/                  # Expo Router routes
+│   ├── (tabs)/           # Authenticated views (Bottom Tabs)
+│   │   ├── dashboard.tsx       # Summary and progress
+│   │   ├── analytics.tsx       # Analytics and charts
+│   │   ├── calculator.tsx      # Health metrics calculator
+│   │   ├── routines.tsx        # Workout management
+│   │   ├── rmCalculator.tsx    # One Rep Max calculator
+│   │   ├── leaderboard.tsx     # Global Hall of Fame
+│   │   ├── socialRoutines.tsx  # Community feed
+│   │   ├── achievements.tsx    # Medals and achievements
+│   │   ├── notifications.tsx   # Notification settings
+│   │   └── profile.tsx         # Profile and security
 │   ├── auth/             # Auth (login, register, forgot-password)
-│   ├── _layout.tsx       # Layout raíz (proveedores y sesión)
-│   └── index.tsx         # Splash / redirección de sesión
-├── api/                  # Cliente Axios y endpoints
-├── components/           # Componentes UI (ui, layout, auth, sections)
-│   ├── OfflineBanner.tsx # Banner de estado de conectividad
+│   ├── _layout.tsx       # Root layout (providers and session)
+│   └── index.tsx         # Splash / session redirect
+├── api/                  # Axios client and endpoints
+├── components/           # UI components (ui, layout, auth, sections)
+│   ├── OfflineBanner.tsx # Connectivity status banner
 │   └── ...
-├── hooks/                # Lógica reutilizable
-│   ├── useOfflineCache.ts    # Patrón de caché offline
-│   └── useNotifications.ts   # Programación de notificaciones
-├── store/                # Estado global Zustand
-│   └── useAuthStore.ts       # Sesión y autenticación
-├── constants/            # Constantes y configuración
-├── data/                 # Datos estáticos (ejercicios, etc.)
-├── __tests__/            # Tests de componentes, hooks, screens y store
-└── assets/               # Imágenes, iconos y recursos
+├── hooks/                # Reusable logic
+│   ├── useOfflineCache.ts    # Offline caching pattern
+│   └── useNotifications.ts   # Notification scheduling
+├── store/                # Zustand global state
+│   └── useAuthStore.ts       # Session and authentication
+├── constants/            # Constants and configuration
+├── data/                 # Static data (exercises, etc.)
+├── __tests__/            # Tests for components, hooks, screens, and store
+└── assets/               # Images, icons, and resources
 ```
 
 ---
 
-## ⚙️ Instalación y Configuración
+## ⚙️ Installation & Setup
 
-### Clonar el repositorio
+### Clone the repository
 
 ```bash
 git clone https://github.com/DeibyGS/evolufit-mobile.git
 cd evolufit-mobile
 ```
 
-### Instalar dependencias
+### Install dependencies
 
-> ⚠️ **Requerido:** `npm install` necesita `legacy-peer-deps=true`. Sin él, npm se queda colgado.
+> ⚠️ **Required:** `npm install` needs `legacy-peer-deps=true`. Without it, npm hangs.
 
 ```bash
 npm install
 ```
 
-### Lanzar en desarrollo
+### Run in development
 
 ```bash
 npx expo start -c --tunnel
 ```
 
-| Plataforma | Comando |
-|------------|---------|
-| Android    | `npm run android` |
-| iOS        | `npm run ios` |
-| Web        | `npm run web` |
+| Platform | Command |
+|----------|---------|
+| Android  | `npm run android` |
+| iOS      | `npm run ios` |
+| Web      | `npm run web` |
 
-> **Tip:** Si Watchman se cuelga: `watchman watch-del-all && watchman shutdown-server`.
+> **Tip:** If Watchman hangs: `watchman watch-del-all && watchman shutdown-server`.
 
 ---
 
-## 🚀 Scripts Disponibles
+## 🚀 Available Scripts
 
-| Comando        | Descripción                                             |
-|----------------|---------------------------------------------------------|
-| `npm start`    | Inicia el servidor de desarrollo de Expo.               |
-| `npm run ios`  | Compila y ejecuta en simulador/device iOS.              |
-| `npm run android` | Compila y ejecuta en emulador/device Android.        |
-| `npm run web`  | Inicia la versión web.                                  |
-| `npm test`     | Ejecuta la suite de tests con Jest (sin coverage).      |
+| Command        | Description                                        |
+|----------------|----------------------------------------------------|
+| `npm start`    | Starts the Expo development server.                |
+| `npm run ios`  | Builds and runs on an iOS simulator/device.        |
+| `npm run android` | Builds and runs on an Android emulator/device.  |
+| `npm run web`  | Starts the web version.                            |
+| `npm test`     | Runs the Jest test suite (no coverage).            |
 
-> **Nota:** Los tests frontend tardan ~80s — es normal, no es un fallo.
+> **Note:** Frontend tests take ~80s — that's normal, not a failure.
 
 ---
 
 ## 🧪 Testing
 
-La suite usa **jest-expo** + **@testing-library/react-native** y cubre componentes, hooks, pantallas y stores.
+The suite uses **jest-expo** + **@testing-library/react-native** and covers components, hooks, screens, and stores.
 
 ```bash
 npm test
 ```
 
-Patrones clave:
-- **CJS mocks:** usar `vi.spyOn` en `beforeAll` (NO `vi.mock`) en módulos con side effects al cargarse.
-- **Notificaciones:** `trigger: TIME_INTERVAL:1s` para pruebas inmediatas (expo-notifications ≥0.28 no acepta `trigger: null`).
+Key patterns:
+- **CJS mocks:** use `vi.spyOn` in `beforeAll` (NOT `vi.mock`) on modules with load-time side effects.
+- **Notifications:** `trigger: TIME_INTERVAL:1s` for immediate testing (expo-notifications ≥0.28 doesn't accept `trigger: null`).
 
 ---
 
-## 🔌 Integración con la API
+## 🔌 API Integration
 
-La app consume la API REST de **EvolutFit Backend** (desplegada en Render).
+The app consumes the **EvolutFit Backend** REST API (deployed on Render).
 
 - **Base URL:** `https://evolufit-backend.onrender.com/api`
-- **Repositorio Backend:** [github.com/DeibyGS/evolufit-backend](https://github.com/DeibyGS/evolufit-backend)
+- **Backend Repository:** [github.com/DeibyGS/evolufit-backend](https://github.com/DeibyGS/evolufit-backend)
 
-Endpoints usados: autenticación JWT, usuarios, workouts, RM, health y social — todos definidos en `api/API.ts`.
+Endpoints used: JWT authentication, users, workouts, RM, health, and social — all defined in `api/API.ts`.
 
 ---
 
-## 🔗 Ecosistema EvolutFit
+## 🔗 EvolutFit Ecosystem
 
-| Proyecto | Descripción |
-|----------|-------------|
-| [evolufit-mobile](https://github.com/DeibyGS/evolufit-mobile) | Esta app móvil (React Native + Expo). |
-| [evolufit-frontend](https://github.com/DeibyGS/evolufit-frontend) | Cliente web SPA (React 19 + Vite), desplegado en Vercel. |
-| [evolufit-backend](https://github.com/DeibyGS/evolufit-backend) | API REST (Node.js + Express + MongoDB), desplegada en Render. |
+| Project | Description |
+|---------|-------------|
+| [evolufit-mobile](https://github.com/DeibyGS/evolufit-mobile) | This mobile app (React Native + Expo). |
+| [evolufit-frontend](https://github.com/DeibyGS/evolufit-frontend) | Web SPA client (React 19 + Vite), deployed on Vercel. |
+| [evolufit-backend](https://github.com/DeibyGS/evolufit-backend) | REST API (Node.js + Express + MongoDB), deployed on Render. |
