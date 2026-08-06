@@ -86,6 +86,46 @@ evolufit-mobile/
 
 ---
 
+## AI Development Benchmark
+
+EvolutFit Mobile was engineered by a human developer working with AI as a **pair programming partner**. The AI accelerated implementation — the React Native architecture, offline strategy, and engineering decisions stayed human.
+
+### How we worked together
+
+| Human-owned | AI implemented, always human-reviewed |
+|-------------|-------------------------------------|
+| Product vision & UX | React Native / Expo component generation |
+| Offline-first architecture | Zustand stores, API layer, hooks |
+| Data model & navigation (typedRoutes) | Refactoring, TypeScript improvements |
+| Code review & final acceptance | Test scaffolding, auxiliary docs |
+
+**Workflow:** `Idea → Spec → AI implementation → Human review → Test → Refine → Merge`
+
+### AI Development Principles
+
+- AI never made product decisions.
+- Every implementation started from a written specification.
+- Documentation was treated as executable context for AI.
+- All generated code required human review.
+- Architecture was preserved over implementation speed.
+
+<details>
+<summary><strong>Supporting metrics</strong></summary>
+<br>
+
+| Metric | Value |
+|--------|-------|
+| AI sessions | 4 logged (CC) |
+| Measured development time | ~25 h |
+| Primary model | Claude Sonnet 4.6 |
+| Secondary | OpenCode (DeepSeek V4 Flash) |
+
+_Measured with [ClaudeStat](https://github.com/DeibyGS/claudestat). Approximate values; part of the EvolutFit ecosystem._
+
+</details>
+
+---
+
 ## ⚙️ Installation & Setup
 
 ### Clone the repository
