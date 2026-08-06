@@ -1,6 +1,19 @@
-# 📱 EvolutFit - Mobile App
+<div align="center">
 
-**EvolutFit** is the mobile application of the comprehensive workout and health management project. Built with **React Native** and **Expo (SDK 54)**, it provides a full experience to log sessions, view progress analytics, calculate your **1RM**, follow a community leaderboard, and receive workout reminders — all with **offline** support.
+# EvoluFit Mobile
+
+**Fitness tracking with offline sync — workouts, 1RM, and a community leaderboard in your pocket.**
+
+Log sessions, review analytics, and track your progress — the mobile companion to the EvolutFit workout ecosystem, with full offline support.
+
+[![React Native](https://img.shields.io/badge/React_Native-0.81-61DAFB?logo=react&logoColor=white)](https://reactnative.dev)
+[![Expo](https://img.shields.io/badge/Expo-SDK_54-black?logo=expo&logoColor=white)](https://expo.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Zustand](https://img.shields.io/badge/Zustand-5.0-593D88)](https://zustand-demo.pmnd.rs)
+
+[✨ Core Highlights](#core-highlights) • [🛠️ Tech Stack](#tech-stack) • [📂 Directory Architecture](#directory-architecture) • [📊 AI Development Benchmark](#ai-development-benchmark) • [⚙️ Installation & Setup](#installation--setup) • [🚀 Available Scripts](#available-scripts) • [🧪 Testing](#testing) • [🔌 API Integration](#api-integration) • [🔗 EvolutFit Ecosystem](#evolufit-ecosystem) • [🤖 Built with AI](#built-with-ai)
+
+</div>
 
 ---
 
@@ -50,7 +63,7 @@
 
 ---
 
-## 📂 Directory Architecture
+## 🗂️ Directory Architecture
 
 ```text
 evolufit-mobile/
@@ -74,10 +87,10 @@ evolufit-mobile/
 │   ├── OfflineBanner.tsx # Connectivity status banner
 │   └── ...
 ├── hooks/                # Reusable logic
-│   ├── useOfflineCache.ts    # Offline caching pattern
-│   └── useNotifications.ts   # Notification scheduling
+│   ├── useOfflineCache.ts # Offline caching pattern
+│   └── useNotifications.ts # Notification scheduling
 ├── store/                # Zustand global state
-│   └── useAuthStore.ts       # Session and authentication
+│   └── useAuthStore.ts   # Session and authentication
 ├── constants/            # Constants and configuration
 ├── data/                 # Static data (exercises, etc.)
 ├── __tests__/            # Tests for components, hooks, screens, and store
@@ -86,16 +99,16 @@ evolufit-mobile/
 
 ---
 
-## AI Development Benchmark
+## 📊 AI Development Benchmark
 
-EvolutFit Mobile was engineered by a human developer working with AI as a **pair programming partner**. The AI accelerated implementation — the React Native architecture, offline strategy, and engineering decisions stayed human.
+EvoluFit Mobile was engineered by a human developer working with AI as a **pair programming partner**. The AI accelerated implementation — the React Native architecture, offline strategy, and engineering decisions stayed human.
 
 ### How we worked together
 
 | Human-owned | AI implemented, always human-reviewed |
 |-------------|-------------------------------------|
 | Product vision & UX | React Native / Expo component generation |
-| Offline-first architecture | Zustand stores, API layer, hooks |
+| Offline-first architecture | Zustand + API layer + hooks |
 | Data model & navigation (typedRoutes) | Refactoring, TypeScript improvements |
 | Code review & final acceptance | Test scaffolding, auxiliary docs |
 
@@ -105,24 +118,8 @@ EvolutFit Mobile was engineered by a human developer working with AI as a **pair
 
 - AI never made product decisions.
 - Every implementation started from a written specification.
-- Documentation was treated as executable context for AI.
 - All generated code required human review.
 - Architecture was preserved over implementation speed.
-
-<details>
-<summary><strong>Supporting metrics</strong></summary>
-<br>
-
-| Metric | Value |
-|--------|-------|
-| AI sessions | 4 logged (CC) |
-| Measured development time | ~25 h |
-| Primary model | Claude Sonnet 4.6 |
-| Secondary | OpenCode (DeepSeek V4 Flash) |
-
-_Measured with [ClaudeStat](https://github.com/DeibyGS/claudestat). Approximate values; part of the EvolutFit ecosystem._
-
-</details>
 
 ---
 
@@ -205,3 +202,24 @@ Endpoints used: JWT authentication, users, workouts, RM, health, and social — 
 | [evolufit-mobile](https://github.com/DeibyGS/evolufit-mobile) | This mobile app (React Native + Expo). |
 | [evolufit-frontend](https://github.com/DeibyGS/evolufit-frontend) | Web SPA client (React 19 + Vite), deployed on Vercel. |
 | [evolufit-backend](https://github.com/DeibyGS/evolufit-backend) | REST API (Node.js + Express + MongoDB), deployed on Render. |
+
+---
+
+## 🤖 Built with AI
+
+EvoluFit Mobile was developed with AI as a collaborative engineering partner. AI accelerated the code-heavy, well-specified parts of the workflow — scaffolding, wiring stores, and writing tests — while a human owned the product vision, architecture, and every final decision.
+
+### How the collaboration worked
+
+| Human-led | AI-assisted, human-reviewed |
+|-----------|----------------------------|
+| Product vision & UX decisions | Component and screen generation |
+| Offline-first architecture | Stores, hooks, and API layer wiring |
+| Data model & navigation | TypeScript improvements, refactoring |
+| Code review & acceptance | Test scaffolding and repeatable setup |
+
+**Workflow:** `Idea → Spec → AI implementation → Human review → Test → Refine → Merge`
+
+Every AI generated line of code was reviewed and validated by the human before merge. AI never owned the product; it accelerated the execution.
+
+> Qualitative assessment only — this repo does not publish fabricated automation metrics. For empirically-measured productivity data, see the author's [ClaudeStat](https://github.com/DeibyGB/claudestat).
