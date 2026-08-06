@@ -11,13 +11,13 @@ Log sessions, review analytics, and track your progress — the mobile companion
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Zustand](https://img.shields.io/badge/Zustand-5.0-593D88)](https://zustand-demo.pmnd.rs)
 
-[✨ Core Highlights](#core-highlights) • [🛠️ Tech Stack](#tech-stack) • [📂 Directory Architecture](#directory-architecture) • [📊 AI Development Benchmark](#ai-development-benchmark) • [⚙️ Installation & Setup](#installation--setup) • [🚀 Available Scripts](#available-scripts) • [🧪 Testing](#testing) • [🔌 API Integration](#api-integration) • [🔗 EvolutFit Ecosystem](#evolufit-ecosystem) • [🤖 Built with AI](#built-with-ai)
+[Core Highlights](#core-highlights) • [Tech Stack](#tech-stack) • [Directory Architecture](#directory-architecture) • [Built with AI](#built-with-ai) • [Installation & Setup](#installation--setup) • [Available Scripts](#available-scripts) • [Testing](#testing) • [API Integration](#api-integration) • [EvolutFit Ecosystem](#evolufit-ecosystem)
 
 </div>
 
 ---
 
-## ✨ Core Highlights
+## Core Highlights
 
 - **Expo Router (File-based):** Declarative navigation with typed routes (`typedRoutes`).
 - **Offline Support:** Proactive connectivity detection with `@react-native-community/netinfo`, a status banner, and request caching (`useOfflineCache`).
@@ -29,7 +29,7 @@ Log sessions, review analytics, and track your progress — the mobile companion
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Core
 
@@ -63,7 +63,7 @@ Log sessions, review analytics, and track your progress — the mobile companion
 
 ---
 
-## 🗂️ Directory Architecture
+## Directory Architecture
 
 ```text
 evolufit-mobile/
@@ -99,31 +99,7 @@ evolufit-mobile/
 
 ---
 
-## 📊 AI Development Benchmark
-
-EvoluFit Mobile was engineered by a human developer working with AI as a **pair programming partner**. The AI accelerated implementation — the React Native architecture, offline strategy, and engineering decisions stayed human.
-
-### How we worked together
-
-| Human-owned | AI implemented, always human-reviewed |
-|-------------|-------------------------------------|
-| Product vision & UX | React Native / Expo component generation |
-| Offline-first architecture | Zustand + API layer + hooks |
-| Data model & navigation (typedRoutes) | Refactoring, TypeScript improvements |
-| Code review & final acceptance | Test scaffolding, auxiliary docs |
-
-**Workflow:** `Idea → Spec → AI implementation → Human review → Test → Refine → Merge`
-
-### AI Development Principles
-
-- AI never made product decisions.
-- Every implementation started from a written specification.
-- All generated code required human review.
-- Architecture was preserved over implementation speed.
-
----
-
-## ⚙️ Installation & Setup
+## Installation & Setup
 
 ### Clone the repository
 
@@ -134,7 +110,7 @@ cd evolufit-mobile
 
 ### Install dependencies
 
-> ⚠️ **Required:** `npm install` needs `legacy-peer-deps=true`. Without it, npm hangs.
+> **Required:** `npm install` needs `legacy-peer-deps=true`. Without it, npm hangs.
 
 ```bash
 npm install
@@ -156,7 +132,7 @@ npx expo start -c --tunnel
 
 ---
 
-## 🚀 Available Scripts
+## Available Scripts
 
 | Command        | Description                                        |
 |----------------|----------------------------------------------------|
@@ -170,7 +146,7 @@ npx expo start -c --tunnel
 
 ---
 
-## 🧪 Testing
+## Testing
 
 The suite uses **jest-expo** + **@testing-library/react-native** and covers components, hooks, screens, and stores.
 
@@ -184,7 +160,7 @@ Key patterns:
 
 ---
 
-## 🔌 API Integration
+## API Integration
 
 The app consumes the **EvolutFit Backend** REST API (deployed on Render).
 
@@ -195,7 +171,7 @@ Endpoints used: JWT authentication, users, workouts, RM, health, and social — 
 
 ---
 
-## 🔗 EvolutFit Ecosystem
+## EvolutFit Ecosystem
 
 | Project | Description |
 |---------|-------------|
@@ -205,7 +181,7 @@ Endpoints used: JWT authentication, users, workouts, RM, health, and social — 
 
 ---
 
-## 🤖 Built with AI
+## Built with AI
 
 EvoluFit Mobile was developed with AI as a collaborative engineering partner. AI accelerated the code-heavy, well-specified parts of the workflow — scaffolding, wiring stores, and writing tests — while a human owned the product vision, architecture, and every final decision.
 
