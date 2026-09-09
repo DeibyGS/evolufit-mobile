@@ -15,6 +15,13 @@ jest.mock("@react-native-async-storage/async-storage", () =>
   require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
 );
 
+// Mock del catálogo de logros — mantiene el test independiente de los datos
+// reales de la app, que ya no se reciben como parámetro (ver hooks/useNotifications.ts)
+jest.mock("../../data/achievements.json", () => [
+  { id: "ach_001", title: "Primer Kilo" },
+  { id: "ach_002", title: "Diez Kilos" },
+]);
+
 // Mock de expo-notifications — todas las funciones usadas en el hook
 jest.mock("expo-notifications", () => ({
   setNotificationHandler: jest.fn(),
@@ -157,10 +164,8 @@ describe("checkAndNotifyStreak", () => {
 });
 
 describe("checkAndNotifyAchievements", () => {
-  const titleMap = { ach_001: "Primer Kilo", ach_002: "Diez Kilos" };
-
   it("envía notificación para logros recién desbloqueados", async () => {
-    await checkAndNotifyAchievements(["ach_001"], titleMap);
+    await checkAndNotifyAchievements(["ach_001"]);
     expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
       expect.objectContaining({
         content: expect.objectContaining({
@@ -177,7 +182,7 @@ describe("checkAndNotifyAchievements", () => {
       JSON.stringify(["ach_001"]),
     );
 
-    await checkAndNotifyAchievements(["ach_001"], titleMap);
+    await checkAndNotifyAchievements(["ach_001"]);
     expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
   });
 
@@ -187,7 +192,7 @@ describe("checkAndNotifyAchievements", () => {
       JSON.stringify(["ach_001"]),
     );
 
-    await checkAndNotifyAchievements(["ach_001", "ach_002"], titleMap);
+    await checkAndNotifyAchievements(["ach_001", "ach_002"]);
 
     expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(1);
     expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
@@ -204,7 +209,7 @@ describe("checkAndNotifyAchievements", () => {
       achievementAlert: false,
     });
 
-    await checkAndNotifyAchievements(["ach_001"], titleMap);
+    await checkAndNotifyAchievements(["ach_001"]);
     expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
   });
 });
